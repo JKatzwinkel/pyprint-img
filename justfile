@@ -3,5 +3,5 @@ update-manual:
     -e ':a; n; /```/ {p; b}; ba}; p' readme.md
 
 test:
-  python -mpytest  --capture=sys --doctest-modules p.py --cov . \
+  python -mpytest --capture=sys --doctest-modules p.py --cov . \
     --cov-report term-missing
