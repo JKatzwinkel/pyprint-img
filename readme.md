@@ -17,6 +17,8 @@ options:
   -y, --crop-y          crop image to terminal height
   -v, --invert          rasterize a negative of the image
   -t NUM, --threshold-arg NUM
-                        value to be passed to the threshold function. required
-                        if selected --threshold mode is percentile or const.
+                        value to be passed to the threshold function (see the
+                        --threshold option). required if selected threshold
+                        mode is "percentile" or "const". threshold mode
+                        "local" allows values between 0 and 9999.
 ```

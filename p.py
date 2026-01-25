@@ -77,17 +77,18 @@ def thr_median_factory(image: Image.Image, _: int = -1) -> ThresholdFunc:
     return thr_percentile_factory(image, 50)
 
 
-def thr_local_avg_factory(image: Image.Image, _: int = -1) -> ThresholdFunc:
-    blur_radius = min(image.width, image.height) // 10
-    averaged = image.filter(
-        ImageFilter.GaussianBlur(blur_radius)
-    ).convert('L')
-
+def thr_local_avg_factory(
+    image: Image.Image, blur_radius: int = 0
+) -> ThresholdFunc:
     def threshold(pixel: tuple[float, float]) -> int:
         assert isinstance(
             result := averaged.getpixel(pixel), int  # type: ignore[arg-type]
         )
         return result
+    blur_radius = blur_radius or min(image.width, image.height) // 10
+    averaged = image.filter(
+        ImageFilter.GaussianBlur(blur_radius)
+    ).convert('L')
     return threshold
 
 
@@ -131,39 +132,49 @@ def rasterize(
     return [''.join(row) for row in result if row]
 
 
-THRESHOLD_FUNC_FACTORIES: dict[str, ThresholdFuncFactory] = {
-    'extremes': thr_btw_extr_factory,
-    'median': thr_median_factory,
-    'percentile': thr_percentile_factory,
-    'const': thr_const_factory,
-    'local': thr_local_avg_factory,
+THRESHOLD_FUNC_FACTORIES: dict[
+    str, tuple[ThresholdFuncFactory, tuple[int, int] | None, int | None]
+] = {
+    'extremes': (thr_btw_extr_factory, None, None),
+    'median': (thr_median_factory, None, None),
+    'percentile': (thr_percentile_factory, (0, 99), 50),
+    'const': (thr_const_factory, (0, 255), 127),
+    'local': (thr_local_avg_factory, (0, 9999), None),
 }
-THR_MODES_REQUIRING_ARGS = ('percentile', 'const')
 
 
 def get_threshold_func(
     image: Image.Image, options: argparse.Namespace
 ) -> ThresholdFunc:
-    return THRESHOLD_FUNC_FACTORIES[options.threshold_mode](
+    return THRESHOLD_FUNC_FACTORIES[options.threshold_mode][0](
         image, options.threshold_arg
     )
+
+
+def thr_arg_value_range_constraints(
+    value_range: tuple[int, int] | None
+) -> Callable[[str], int]:
+    def check(value: str) -> int:
+        if not value_range:
+            return int(value)
+        if value_range[0] <= (sane := int(value)) <= value_range[1]:
+            return sane
+        raise ValueError(
+            f'value must be between {" and ".join(map(str, value_range))}'
+        )
+    return check
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     argp_thr = argparse.ArgumentParser(add_help=False)
     threshold_choices = tuple(THRESHOLD_FUNC_FACTORIES.keys())
-    def thr_arg_value_range_constraints(
-        value_range: tuple[int, int]
-    ) -> Callable[[str], int]:
-        def check(value: str) -> int:
-            if value_range[0] <= (sane := int(value)) <= value_range[1]:
-                return sane
-            raise ValueError(
-                f'value must be between {" and ".join(map(str, value_range))}'
-            )
-        return check
+    thr_modes_requiring_args = tuple(
+        mode for mode, properties in THRESHOLD_FUNC_FACTORIES.items()
+        if properties[2]
+    )
+    thr_mode_arg_name = 'threshold'
     argp_thr.add_argument(
-        '-m', '--threshold', dest='threshold_mode', metavar='mode',
+        '-m', f'--{thr_mode_arg_name}', dest='threshold_mode', metavar='mode',
         choices=threshold_choices, default='local',
         help=(
             f'threshold mode, allowed values: [{"|".join(threshold_choices)}] '
@@ -192,29 +203,29 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help='rasterize a negative of the image',
     )
     thr_arg_help = (
-        'value to be passed to the threshold function. '
-        'required if selected --threshold mode is '
-        f'{" or ".join(THR_MODES_REQUIRING_ARGS)}. '
+        'value to be passed to the threshold function '
+        f'(see the --{thr_mode_arg_name} option). '
+        'required if selected threshold mode is '
+        f'{" or ".join(f'"{mode}"' for mode in thr_modes_requiring_args)}. '
     )
-    thr_arg_value_default = None
-    if thr_options.threshold_mode in THR_MODES_REQUIRING_ARGS:
-        thr_arg_value_range = (
-            (0, 100) if thr_options.threshold_mode == 'percentile' else (0, 255)
-        )
-        thr_arg_value_default = (
-            50 if thr_options.threshold_mode == 'percentile' else 127
-        )
+    _, thr_arg_value_range, thr_arg_value_default = THRESHOLD_FUNC_FACTORIES[
+        thr_options.threshold_mode
+    ]
+    if thr_arg_value_range:
         thr_arg_help += (
-            f'--threshold mode "{thr_options.threshold_mode}" '
+            f'threshold mode "{thr_options.threshold_mode}" '
             'allows values between '
-            f'{" and ".join(map(str, thr_arg_value_range))} '
-            '(default: %(default)s).'
+            f'{" and ".join(map(str, thr_arg_value_range))}'
         )
+    if thr_arg_value_default:
+        thr_arg_help += ' (default: %(default)s).'
+    else:
+        thr_arg_help += '.'
     argp.add_argument(
         '-t', '--threshold-arg', dest='threshold_arg', metavar='NUM',
         help=thr_arg_help,
         type=(
-            int if thr_options.threshold_mode not in THR_MODES_REQUIRING_ARGS
+            int if thr_options.threshold_mode not in thr_modes_requiring_args
             else thr_arg_value_range_constraints(thr_arg_value_range)
         ),
         default=thr_arg_value_default,
@@ -228,6 +239,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         ('-m const -t 256 f.png', True),
         ('-m const -t 128 f.png', False),
         ('-m percentile -t 128 f.pn', True),
+        ('-m local f.png', False),
+        ('-m local -t fya f.png', True),
     )
 )
 def test_parse_args(argv: str, error: bool) -> None:
@@ -240,10 +253,34 @@ def test_parse_args(argv: str, error: bool) -> None:
 
 def test_file_not_found() -> None:
     with pytest.raises(FileNotFoundError):
-        main('fya.jpg'.split())
+        main(['fya.jpg'])
 
 
-def main(argv: list[str] = sys.argv[1:]) -> None:
+@pytest.mark.parametrize(
+    'argv, phrase, expect', (
+        ('-m percentile', 'mode "percentile"', True),
+        ('-m percentile', '0 and 99', True),
+        ('-m percentile', 'default: 50', True),
+        ('-m local', 'allows values', True),
+        ('-m local', '0 and 9999', True),
+        ('-m median', 'allows values', False),
+    )
+)
+def test_cli_help(
+    argv: str, phrase: str, expect: bool,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    try:
+        main(argv.split() + ['-h'])
+    except SystemExit:  # ???
+        ...
+    if expect:
+        assert phrase in capsys.readouterr().out
+    else:
+        assert phrase not in capsys.readouterr().out
+
+
+def main(argv: list[str] = sys.argv[1:]) -> int:
     options = parse_args(argv)
     print(options)
     im = Image.open(options.filename)
@@ -253,6 +290,7 @@ def main(argv: list[str] = sys.argv[1:]) -> None:
         threshold_func=get_threshold_func(im, options),
     )
     print('\n'.join(cc))
+    return 0
 
 
 if __name__ == '__main__':
