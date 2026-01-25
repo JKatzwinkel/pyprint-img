@@ -1,6 +1,7 @@
 [doc("update usage instructions code block in readme.md \
 with the output of running cli --help again")]
 update-manual:
+  #!/usr/bin/env bash
   sed -i -ne '/```help/ {p; r'<(python p.py -h) \
     -e ':a; n; /```/ {p; b}; ba}; p' readme.md
 
