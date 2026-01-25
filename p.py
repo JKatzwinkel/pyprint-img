@@ -22,15 +22,6 @@ def terminal_rcwh() -> tuple[int, int, int, int]:
     )
 
 
-def chardims(
-    rchw_func: Callable[
-        [], tuple[int, int, int, int]
-    ] = terminal_rcwh,
-) -> tuple[float, float]:
-    r, c, h, w = rchw_func()
-    return w / c, h / r
-
-
 def char_name(matrix: list[bool], inverted: bool = False) -> str:
     '''
     >>> char_name([False, True, True, False])
@@ -110,12 +101,7 @@ def rasterize(
     ] = terminal_rcwh,
 ) -> list[str]:
 
-    def sample(
-        x1: float, y1: float,
-        x2: float, y2: float,
-    ) -> str:
-        sx = (x2 - x1) / 2
-        sy = (y2 - y1) / 4
+    def sample(x1: float, y1: float) -> str:
         matrix = []
         for dx, dy in (
             (0, 0), (0, 1), (0, 2), (1, 0),
@@ -129,23 +115,19 @@ def rasterize(
 
     threshold: ThresholdFunc = threshold_func or thr_btw_extr_factory(image, 0)
     r, c, w, h = terminal_rcwh()
-    sx, sy = w / c, h / r
+    cw, ch = w / c, h / r
+    sx, sy = cw / 2, ch / 4
     result: list[list[str]] = [[]]
-    max_row = int(image.height / sy) if not crop_y else min(
-        int(image.height / sy), r
+    max_row = int(image.height / ch) if not crop_y else min(
+        int(image.height / ch), r
     )
+    max_col = int(min(image.width / cw, c))
     image = image.convert('L')
     for y in range(max_row):
-        for x in range(c):
-            pixel = x * sx, y * sy
-            if pixel[0] + sx > image.width:
-                result.append([])
-                break
-            result[-1].append(
-                sample(
-                    pixel[0], pixel[1], pixel[0] + sx, pixel[1] + sy,
-                )
-            )
+        for x in range(max_col):
+            pixel = x * cw, y * ch
+            result[-1].append(sample(*pixel))
+        result.append([])
     return [''.join(row) for row in result if row]
 
 
