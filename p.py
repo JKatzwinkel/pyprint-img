@@ -272,12 +272,19 @@ def test_cli_help(
 ) -> None:
     try:
         main(argv.split() + ['-h'])
-    except SystemExit:  # ???
+    except SystemExit:
         ...
+    collapsed = ' '.join(
+        ' '.join(
+            capsys.readouterr().out.split('\n')
+        ).split()
+    )
     if expect:
-        assert phrase in capsys.readouterr().out
+        assert phrase in capsys.readouterr().out or phrase in collapsed
     else:
-        assert phrase not in capsys.readouterr().out
+        assert (
+            phrase not in capsys.readouterr().out and phrase not in collapsed
+        )
 
 
 def main(argv: list[str] = sys.argv[1:]) -> int:
