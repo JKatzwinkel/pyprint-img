@@ -11,6 +11,8 @@ from typing import Callable
 
 from PIL import Image, ImageFilter
 
+from unittest import mock
+
 import pytest
 
 
@@ -312,7 +314,11 @@ def test_cli_help(
         )
 
 
-def test_cli_creates_file() -> None:
+@mock.patch(
+    f'{__name__}.terminal_rcwh',
+    side_effect=lambda: (44, 174, 1914, 1012),
+)
+def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         outfile = pathlib.Path(tmp) / 'fya.txt'
         main(f'shelly.jpg -o {outfile}'.split())
