@@ -35,9 +35,10 @@ jobs:
   update-manual:
     needs: [test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-
       - uses: actions/checkout@v6.0.2
         with:
           persist-credentials: false
@@ -59,6 +60,10 @@ jobs:
         run: |
           chg=$(git diff --shortstat | wc -l)
           echo "changed=${chg}" >> ${GITHUB_OUTPUT}
+
+      - name: show changes
+        if: steps.changed.outputs.changed != '0'
+        run: git diff
 
       - name: commit changes
         if: steps.changed.outputs.changed != '0'
