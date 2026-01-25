@@ -64,22 +64,33 @@ def percentile(histogram: list[int], percent: int = 50) -> int:
     return i
 
 
-def thr_percentile(percent: int) -> Callable[[Image], float]:
-    return lambda i: percentile(i.histogram(), percent)
+type ThresholdFunc = Callable[[tuple[float, float]], float]
+type ThresholdFuncFactory = Callable[[Image.Image, int], ThresholdFunc]
 
 
-def thr_const(threshold: int) -> Callable[[Image], float]:
-    return lambda i: threshold
+def thr_percentile_factory(image: Image.Image, percent: int = 50) -> ThresholdFunc:
+    threshold = percentile(image.convert('L').histogram(), percent)
+    return lambda pixel: threshold
 
 
-thr_btw_extr = lambda i: sum(i.getextrema()) / 2
-thr_median = thr_percentile(50)
+def thr_const_factory(image: Image.Image, threshold: int = 127) -> ThresholdFunc:
+    return lambda pixel: threshold
+
+
+def thr_btw_extr_factory(image: Image.Image, _: int | None) -> ThresholdFunc:
+    threshold = sum(image.convert('L').getextrema()) / 2  # type: ignore[arg-type]
+    return lambda pixel: threshold
+
+
+def thr_median_factory(image: Image.Image, _: int = -1) -> ThresholdFunc:
+    return thr_percentile_factory(image, 50)
+
 
 def rasterize(
-    image: Image,
+    image: Image.Image,
     inverted: bool = False,
     crop_y: bool = False,
-    threshold_func: Callable[[Image], float] = thr_btw_extr,
+    threshold_func: ThresholdFunc | None = None,
     rchw_func: Callable[
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
@@ -97,17 +108,19 @@ def rasterize(
             (1, 1), (1, 2), (0, 3), (1, 3),
         ):
             pixel = x1 + dx * sx, y1 + dy * sy
-            matrix.append(image.getpixel(pixel) > threshold)
+            pixelvalue = image.getpixel(pixel) or 0  # type: ignore[arg-type]
+            assert isinstance(pixelvalue, int), f'{pixelvalue}'
+            matrix.append(pixelvalue > threshold(pixel))
         return unicodedata.lookup(char_name(matrix, inverted=inverted))
 
-    image = image.convert('L')
-    threshold = threshold_func(image)
+    threshold: ThresholdFunc = threshold_func or thr_btw_extr_factory(image, 0)
     r, c, w, h = terminal_rcwh()
     sx, sy = w / c, h / r
     result: list[list[str]] = [[]]
     max_row = int(image.height / sy) if not crop_y else min(
         int(image.height / sy), r
     )
+    image = image.convert('L')
     for y in range(max_row):
         for x in range(c):
             pixel = x * sx, y * sy
@@ -122,25 +135,25 @@ def rasterize(
     return [''.join(row) for row in result if row]
 
 
-THRESHOLD_FUNCS = {
-    'extremes': thr_btw_extr,
-    'median': thr_median,
-    'percentile': thr_percentile,
-    'const': thr_const,
+THRESHOLD_FUNC_FACTORIES: dict[str, ThresholdFuncFactory] = {
+    'extremes': thr_btw_extr_factory,
+    'median': thr_median_factory,
+    'percentile': thr_percentile_factory,
+    'const': thr_const_factory,
 }
 THR_MODES_REQUIRING_ARGS = ('percentile', 'const')
 
-def get_threshold_func(options: argparse.Namespace) -> Callable[[Image], bool]:
-    if options.threshold_mode in THR_MODES_REQUIRING_ARGS:
-        return THRESHOLD_FUNCS[options.threshold_mode]( # type: ignore[no-any-return]
-            options.threshold_arg
-        )
-    return THRESHOLD_FUNCS[options.threshold_mode]
+def get_threshold_func(
+    image: Image.Image, options: argparse.Namespace
+) -> ThresholdFunc:
+    return THRESHOLD_FUNC_FACTORIES[options.threshold_mode](
+        image, options.threshold_arg
+    )
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     argp_thr = argparse.ArgumentParser(add_help=False)
-    threshold_choices = tuple(THRESHOLD_FUNCS.keys())
+    threshold_choices = tuple(THRESHOLD_FUNC_FACTORIES.keys())
     def thr_arg_value_range_constraints(
         value_range: tuple[int, int]
     ) -> Callable[[str], int]:
@@ -239,7 +252,7 @@ def main(argv: list[str] = sys.argv[1:]) -> None:
     cc = rasterize(
         im, inverted=options.invert,
         crop_y=options.crop_y,
-        threshold_func=get_threshold_func(options),
+        threshold_func=get_threshold_func(im, options),
     )
     print('\n'.join(cc))
 
