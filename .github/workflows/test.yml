@@ -31,4 +31,45 @@ jobs:
 
       - run: just lint --exit-zero
 
+
+  update-manual:
+    needs: [test]
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - uses: extractions/setup-just@v3
+
+      - run: pip install -r requirements.txt
+
+      - name: write output of --help into readme.md
+        run: just update-manual
+
+      - name: see if something changed
+        id: changed
+        run: |
+          chg=$(git diff --shortstat | wc -l)
+          echo "changed=${chg}" >> ${GITHUB_OUTPUT}
+
+      - name: commit changes
+        if: steps.changed.outputs.changed != '0'
+        env:
+          GIT_MAIL: >-
+            41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          git config user.email "${GIT_MAIL}"
+          git config user.name "github-actions[bot]"
+          git add readme.md
+          git commit -m "doc: update usage instructions in readme.md"
+          git push
+
 ...
