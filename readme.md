@@ -13,7 +13,7 @@ options:
   -m mode, --threshold mode
                         threshold mode, allowed values:
                         [extremes|median|percentile|const|local] (default:
-                        median)
+                        local)
   -y, --crop-y          crop image to terminal height
   -v, --invert          rasterize a negative of the image
   -t NUM, --threshold-arg NUM

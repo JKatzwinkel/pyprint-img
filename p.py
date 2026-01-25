@@ -182,7 +182,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         return check
     argp_thr.add_argument(
         '-m', '--threshold', dest='threshold_mode', metavar='mode',
-        choices=threshold_choices, default='median',
+        choices=threshold_choices, default='local',
         help=(
             f'threshold mode, allowed values: [{"|".join(threshold_choices)}] '
             '(default: %(default)s)'
