@@ -42,35 +42,50 @@ def char_name(matrix: list[bool], inverted: bool = False) -> str:
     return f'BRAILLE PATTERN DOTS-{key}' if key else 'En space'
 
 
-def subsample(
-    image: Image,
-    x1: float, y1: float,
-    x2: float, y2: float,
-    threshold: float,
-    inverted: bool = False,
-) -> str:
-    sx = (x2 - x1) / 2
-    sy = (y2 - y1) / 4
-    matrix = []
-    for dx, dy in (
-        (0, 0), (0, 1), (0, 2), (1, 0),
-        (1, 1), (1, 2), (0, 3), (1, 3),
-    ):
-        pixel = x1 + dx * sx, y1 + dy * sy
-        matrix.append(image.getpixel(pixel) > threshold)
-    return unicodedata.lookup(char_name(matrix, inverted=inverted))
+def median(histogram: list[int]) -> int:
+    '''
+    >>> median([0, 3, 2, 1])
+    1
+    '''
+    target = sum(histogram) / 2
+    acc = 0
+    for i, count in enumerate(histogram):
+        if (acc := acc + count) >= target:
+            break
+    return i
 
 
-def sample(
+thr_btw_extr = lambda i: sum(i.getextrema()) / 2
+thr_median = lambda i: median(i.histogram())
+
+
+def rasterize(
     image: Image,
     inverted: bool = False,
     crop_y: bool = False,
+    threshold_func: Callable[[Image], float] = thr_btw_extr,
     rchw_func: Callable[
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
 ) -> list[str]:
+
+    def sample(
+        x1: float, y1: float,
+        x2: float, y2: float,
+    ) -> str:
+        sx = (x2 - x1) / 2
+        sy = (y2 - y1) / 4
+        matrix = []
+        for dx, dy in (
+            (0, 0), (0, 1), (0, 2), (1, 0),
+            (1, 1), (1, 2), (0, 3), (1, 3),
+        ):
+            pixel = x1 + dx * sx, y1 + dy * sy
+            matrix.append(image.getpixel(pixel) > threshold)
+        return unicodedata.lookup(char_name(matrix, inverted=inverted))
+
     image = image.convert('L')
-    threshold = sum(image.getextrema()) / 2
+    threshold = threshold_func(image)
     r, c, w, h = terminal_rcwh()
     sx, sy = w / c, h / r
     result: list[list[str]] = [[]]
@@ -84,10 +99,8 @@ def sample(
                 result.append([])
                 break
             result[-1].append(
-                subsample(
-                    image, pixel[0], pixel[1], pixel[0] + sx, pixel[1] + sy,
-                    threshold,
-                    inverted=inverted,
+                sample(
+                    pixel[0], pixel[1], pixel[0] + sx, pixel[1] + sy,
                 )
             )
     return [''.join(row) for row in result if row]
@@ -95,5 +108,5 @@ def sample(
 
 if __name__ == '__main__':
     im = Image.open('shelly.jpg')
-    cc = sample(im, inverted=False, crop_y=True)
+    cc = rasterize(im, inverted=False, crop_y=False, threshold_func=thr_median)
     print('\n'.join(cc))
