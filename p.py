@@ -7,7 +7,7 @@ from typing import Callable
 from PIL import Image
 
 
-def terminal_rchw() -> tuple[int, int, int, int]:
+def terminal_rcwh() -> tuple[int, int, int, int]:
     return struct.unpack(
         'HHHH', fcntl.ioctl(
             0, termios.TIOCGWINSZ,
@@ -19,7 +19,7 @@ def terminal_rchw() -> tuple[int, int, int, int]:
 def chardims(
     rchw_func: Callable[
         [], tuple[int, int, int, int]
-    ] = terminal_rchw
+    ] = terminal_rcwh,
 ) -> tuple[float, float]:
     r, c, h, w = rchw_func()
     return w / c, h / r
@@ -65,9 +65,9 @@ def sample(
     inverted: bool = False,
     rchw_func: Callable[
         [], tuple[int, int, int, int]
-    ] = terminal_rchw,
+    ] = terminal_rcwh,
 ) -> list[str]:
-    r, c, h, w = terminal_rchw()
+    r, c, w, h = terminal_rcwh()
     sx, sy = w / c, h / r
     result: list[list[str]] = [[]]
     for y in range(r):
