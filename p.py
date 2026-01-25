@@ -63,6 +63,7 @@ def subsample(
 def sample(
     image: Image,
     inverted: bool = False,
+    crop_y: bool = False,
     rchw_func: Callable[
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
@@ -70,9 +71,10 @@ def sample(
     r, c, w, h = terminal_rcwh()
     sx, sy = w / c, h / r
     result: list[list[str]] = [[]]
-    for y in range(r):
-        if (y + 1) * sy > image.height:
-            break
+    max_row = int(image.height / sy) if not crop_y else min(
+        int(image.height / sy), r
+    )
+    for y in range(max_row):
         for x in range(c):
             pixel = x * sx, y * sy
             if pixel[0] + sx > image.width:
@@ -89,5 +91,5 @@ def sample(
 
 if __name__ == '__main__':
     im = Image.open('shelly.jpg')
-    cc = sample(im, inverted=False)
+    cc = sample(im, inverted=False, crop_y=True)
     print('\n'.join(cc))
