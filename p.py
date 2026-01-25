@@ -62,21 +62,27 @@ type ThresholdFunc = Callable[[tuple[float, float]], float]
 type ThresholdFuncFactory = Callable[[Image.Image, int], ThresholdFunc]
 
 
-def thr_percentile_factory(image: Image.Image, percent: int = 50) -> ThresholdFunc:
+def thr_percentile_factory(
+    image: Image.Image, percent: int = 50,
+) -> ThresholdFunc:
     threshold = percentile(image.convert('L').histogram(), percent)
     return lambda pixel: threshold
 
 
-def thr_const_factory(image: Image.Image, threshold: int = 127) -> ThresholdFunc:
+def thr_const_factory(
+    image: Image.Image, threshold: int = 127,
+) -> ThresholdFunc:
     return lambda pixel: threshold
 
 
 def thr_btw_extr_factory(image: Image.Image, _: int | None) -> ThresholdFunc:
-    threshold = sum(image.convert('L').getextrema()) / 2  # type: ignore[arg-type]
+    threshold = sum(
+        image.convert('L').getextrema()  # type: ignore[arg-type]
+    ) / 2
     return lambda pixel: threshold
 
 
-def thr_median_factory(image: Image.Image, _: int = -1) -> ThresholdFunc:
+def thr_median_factory(image: Image.Image, _: int | None) -> ThresholdFunc:
     return thr_percentile_factory(image, 50)
 
 
