@@ -25,6 +25,6 @@ jobs:
 
       - run: pip install -r requirements-dev.txt
 
-      - run: just test
+      - run: just test -v
 
 ...
