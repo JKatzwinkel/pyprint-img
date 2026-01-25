@@ -42,12 +42,15 @@ def char_name(matrix: list[bool], inverted: bool = False) -> str:
     return f'BRAILLE PATTERN DOTS-{key}' if key else 'En space'
 
 
-def median(histogram: list[int]) -> int:
+def percentile(histogram: list[int], percent: int = 50) -> int:
     '''
-    >>> median([0, 3, 2, 1])
+    >>> percentile([0, 3, 2, 1], 50)
     1
+
+    >>> percentile([0, 3, 2, 1], 66)
+    2
     '''
-    target = sum(histogram) / 2
+    target = sum(histogram) * percent / 100
     acc = 0
     for i, count in enumerate(histogram):
         if (acc := acc + count) >= target:
@@ -55,9 +58,12 @@ def median(histogram: list[int]) -> int:
     return i
 
 
-thr_btw_extr = lambda i: sum(i.getextrema()) / 2
-thr_median = lambda i: median(i.histogram())
+def thr_percentile(percent: int) -> Callable[[Image], float]:
+    return lambda i: percentile(i.histogram(), percent)
 
+
+thr_btw_extr = lambda i: sum(i.getextrema()) / 2
+thr_median = thr_percentile(50)
 
 def rasterize(
     image: Image,
@@ -108,5 +114,7 @@ def rasterize(
 
 if __name__ == '__main__':
     im = Image.open('shelly.jpg')
-    cc = rasterize(im, inverted=False, crop_y=False, threshold_func=thr_median)
+    cc = rasterize(
+        im, inverted=False, crop_y=False, threshold_func=thr_percentile(42),
+    )
     print('\n'.join(cc))
