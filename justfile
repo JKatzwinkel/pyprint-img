@@ -12,3 +12,7 @@ test pytest_args='':
 # run flake8
 lint flake8_args='':
   python -mflake8 p.py {{flake8_args}}
+
+# run mypy
+type mypy_args='':
+  python -mmypy --strict {{mypy_args}} p.py

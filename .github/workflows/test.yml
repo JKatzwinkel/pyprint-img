@@ -27,6 +27,8 @@ jobs:
 
       - run: just test -v
 
+      - run: just type
+
       - run: just lint --exit-zero
 
 ...
