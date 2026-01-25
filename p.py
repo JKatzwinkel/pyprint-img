@@ -105,6 +105,7 @@ def rasterize(
     image: Image.Image,
     inverted: bool = False,
     crop_y: bool = False,
+    antialias: bool = False,
     threshold_func: ThresholdFunc | None = None,
     rchw_func: Callable[
         [], tuple[int, int, int, int]
@@ -133,6 +134,10 @@ def rasterize(
     )
     max_col = int(min(image.width / cw, c))
     image = image.convert('L')
+    if antialias:
+        image = image.filter(
+            ImageFilter.MedianFilter(size=int(sx / 2) * 2 + 1)
+        )
     for y in range(max_row):
         for x in range(max_col):
             pixel = x * cw, y * ch
@@ -220,6 +225,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     argp.add_argument(
         '-v', '--invert', dest='invert', action='store_true',
         help='rasterize a negative of the image',
+    )
+    argp.add_argument(
+        '-a', '--smooth', dest='antialias', action='store_true', default=False,
+        help=(
+            'smooth input image a little bit based on the sample rate. '
+            'might be a good idea for images with a lot highly contrasted '
+            'detail but is slow '
+            '(default: %(default)s).'
+        ),
     )
     argp.add_argument(
         '-f', '--force', dest='output_overwrite', action='store_true',
@@ -348,6 +362,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
     cc = rasterize(
         im, inverted=options.invert,
         crop_y=options.crop_y,
+        antialias=options.antialias,
         threshold_func=get_threshold_func(im, options),
     )
     options.outputfile.touch(
