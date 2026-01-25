@@ -8,7 +8,7 @@ import textwrap
 import unicodedata
 from typing import Callable
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 import pytest
 
@@ -86,6 +86,20 @@ def thr_median_factory(image: Image.Image, _: int = -1) -> ThresholdFunc:
     return thr_percentile_factory(image, 50)
 
 
+def thr_local_avg_factory(image: Image.Image, _: int = -1) -> ThresholdFunc:
+    blur_radius = min(image.width, image.height) // 10
+    averaged = image.filter(
+        ImageFilter.GaussianBlur(blur_radius)
+    ).convert('L')
+
+    def threshold(pixel: tuple[float, float]) -> int:
+        assert isinstance(
+            result := averaged.getpixel(pixel), int  # type: ignore[arg-type]
+        )
+        return result
+    return threshold
+
+
 def rasterize(
     image: Image.Image,
     inverted: bool = False,
@@ -140,8 +154,10 @@ THRESHOLD_FUNC_FACTORIES: dict[str, ThresholdFuncFactory] = {
     'median': thr_median_factory,
     'percentile': thr_percentile_factory,
     'const': thr_const_factory,
+    'local': thr_local_avg_factory,
 }
 THR_MODES_REQUIRING_ARGS = ('percentile', 'const')
+
 
 def get_threshold_func(
     image: Image.Image, options: argparse.Namespace
@@ -168,7 +184,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         '-m', '--threshold', dest='threshold_mode', metavar='mode',
         choices=threshold_choices, default='median',
         help=(
-            f'threshold mode, allowed values: {" or ".join(threshold_choices)} '
+            f'threshold mode, allowed values: [{"|".join(threshold_choices)}] '
             '(default: %(default)s)'
         ),
     )
