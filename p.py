@@ -46,6 +46,7 @@ def subsample(
     image: Image,
     x1: float, y1: float,
     x2: float, y2: float,
+    threshold: float,
     inverted: bool = False,
 ) -> str:
     sx = (x2 - x1) / 2
@@ -56,7 +57,7 @@ def subsample(
         (1, 1), (1, 2), (0, 3), (1, 3),
     ):
         pixel = x1 + dx * sx, y1 + dy * sy
-        matrix.append(sum(image.getpixel(pixel)) > 384)
+        matrix.append(image.getpixel(pixel) > threshold)
     return unicodedata.lookup(char_name(matrix, inverted=inverted))
 
 
@@ -68,6 +69,8 @@ def sample(
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
 ) -> list[str]:
+    image = image.convert('L')
+    threshold = sum(image.getextrema()) / 2
     r, c, w, h = terminal_rcwh()
     sx, sy = w / c, h / r
     result: list[list[str]] = [[]]
@@ -83,6 +86,7 @@ def sample(
             result[-1].append(
                 subsample(
                     image, pixel[0], pixel[1], pixel[0] + sx, pixel[1] + sy,
+                    threshold,
                     inverted=inverted,
                 )
             )
