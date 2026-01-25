@@ -3,6 +3,7 @@ import fcntl
 import pathlib
 import struct
 import sys
+import tempfile
 import termios
 import textwrap
 import unicodedata
@@ -174,7 +175,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     thr_mode_arg_name = 'threshold'
     argp_thr.add_argument(
-        '-m', f'--{thr_mode_arg_name}', dest='threshold_mode', metavar='mode',
+        '-m', f'--{thr_mode_arg_name}', dest='threshold_mode', metavar='MODE',
         choices=threshold_choices, default='local',
         help=(
             f'threshold mode, allowed values: [{"|".join(threshold_choices)}] '
@@ -183,16 +184,26 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     thr_options, _ = argp_thr.parse_known_args(argv)
 
+    argp_out = argparse.ArgumentParser(add_help=False)
+    stdout_path = pathlib.Path('/dev/stdout')
+    argp_out.add_argument(
+        '-o', '--output', dest='outputfile', type=pathlib.Path,
+        metavar='FILE', default=stdout_path,
+        help='output file (default: %(default)s).',
+    )
+    out_options, _ = argp_out.parse_known_args(argv)
+
     argp = argparse.ArgumentParser(
         description=textwrap.dedent(
             '''
             rasterize an image into the terminal.
             '''
         ),
-        parents=[argp_thr],
+        parents=[argp_thr, argp_out],
     )
     argp.add_argument(
-        'filename', help='path to image file', type=pathlib.Path,
+        'inputfile', type=pathlib.Path, metavar='FILE',
+        help='path to input image file.',
     )
     argp.add_argument(
         '-y', '--crop-y', dest='crop_y', action='store_true',
@@ -201,6 +212,16 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     argp.add_argument(
         '-v', '--invert', dest='invert', action='store_true',
         help='rasterize a negative of the image',
+    )
+    argp.add_argument(
+        '-f', '--force', dest='output_overwrite', action='store_true',
+        default=(
+            out_options.outputfile.resolve() == stdout_path.resolve()
+        ),
+        help=(
+            'overwrite existing output file '
+            f'(default: %(default)s for {out_options.outputfile}).'
+        ),
     )
     thr_arg_help = (
         'value to be passed to the threshold function '
@@ -264,6 +285,10 @@ def test_file_not_found() -> None:
         ('-m local', 'allows values', True),
         ('-m local', '0 and 9999', True),
         ('-m median', 'allows values', False),
+        ('-o fya.txt', 'output file (default: False', True),
+        ('-o /dev/stdout', 'output file (default: True', True),
+        ('', 'default: /dev/stdout', True),
+        ('', 'output file (default: True', True),
     )
 )
 def test_cli_help(
@@ -287,16 +312,37 @@ def test_cli_help(
         )
 
 
+def test_cli_creates_file() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        outfile = pathlib.Path(tmp) / 'fya.txt'
+        main(f'shelly.jpg -o {outfile}'.split())
+        assert outfile.exists()
+        with pytest.raises(SystemExit):
+            main(f'irrelevant.jpg -o {outfile}'.split())
+        assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
+
+
 def main(argv: list[str] = sys.argv[1:]) -> int:
     options = parse_args(argv)
     print(options)
-    im = Image.open(options.filename)
+    if not options.output_overwrite and options.outputfile.exists():
+        print(
+            f'output file {options.outputfile} already exists! '
+            'set option --force to overwrite.',
+            file=sys.stderr
+        )
+        sys.exit(1)
+    im = Image.open(options.inputfile)
     cc = rasterize(
         im, inverted=options.invert,
         crop_y=options.crop_y,
         threshold_func=get_threshold_func(im, options),
     )
-    print('\n'.join(cc))
+    options.outputfile.touch(
+        mode=0o644, exist_ok=options.output_overwrite,
+    )
+    with options.outputfile.open('w') as f:
+        print('\n'.join(cc), file=f)
     return 0
 
 
