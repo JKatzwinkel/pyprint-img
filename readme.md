@@ -35,3 +35,89 @@ resizing options:
                         horizontally (default: False).
   -z, --zoom FACTOR     factor by which input image should be scaled in size.
 ```
+
+
+## examples
+
+example image:
+
+![](./epples.png)
+
+
+basic usage:
+
+```bash
+python p.py eppels.png
+```
+
+```output
+⣿⣿⣷⣶⣶⣶⣶⡶⠶⠶⠶⣾⣿⣿⣿⣶⣶⣶⣶⣶⣶⣶
+⣿⣿⣿⣿⣿⣿⠋ ⡀⢀⣀⣄⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⠿⠿  ⠈⠸⠿⠇⡸⠿⠿⠿⣿⣿⣿⣿⣿⣿
+⣿⣿⣏       ⣠ ⠠⣿⡗  ⣩⡻⣿⣿⣿
+⣿⣿⣿⣷⣶⣶⣶⡶⠒⠛⠁  ⠈⠙⠻⠿⠿⠒⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⡀          ⣠⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣮⣦⣄⣀ ⢀⣀⣀⣤⣶⣿⣿⣿⣿⣿
+```
+
+scale input image by factor `2` first:
+
+```bash
+python p.py eppels.png -z 2
+```
+
+```output
+⣶⣿⣿⣷⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⡶⢶⣶⣶⣶⣶⣶⣿⣿⣿⣿⣿⣷⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠋⠉⠉⠉⠙⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠁  ⠙⠄    ⣀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿   ⢰⣦⣴⣴⣶⣤⣾⣿⠂⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿   ⠈⠿⣿⣿⣿⣿⣿⡗ ⢀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⡿⠟⠛⠛⠉⠉ ⣀⣤⡠⢴⠿⣿⠟⠛⠁⢉⣀⠼⠛⠋⠉⠉⠉⠙⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⠋       ⠘⢿⣷⡀    ⢀⠈  ⣤⣿⣷⣝⡄    ⠉⠻⢿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣷⣄ ⢀       ⠈⠁  ⣠⣶⠏  ⠰⣿⣿⣿⣭⣤⣄⣀⣀⣔⣮⣿⡀⢻⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣷⣿⣷⣶⣤⣤⣤⣤⣄⣤⡴⠿⢿⣿⢠   ⠈⠻⣿⢿⣿⣿⣿⣿⣿⣿⡿⠊ ⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋    ⠙⠌⢠⡀     ⠈⢻⢻⢿⣿⠑⠉  ⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀         ⠹⣦⠄           ⣼⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣗⣄          ⠛⠂        ⣠⣾⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣮⡷⣤⣀            ⣀⣠⣤⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣤⣤⣤⣤⣤⣤⣤⣴⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+```
+
+
+the default mode of threshold computation is some kind of localized brightness
+adjustment by applying gaussian blur with a radius proportional to the image's
+dimensions. A smaller radius value can bring out more detail:
+
+```bash
+python p.py eppels.png -t 5
+```
+
+```output
+⣾⣷⣶⣶⣶⣶⣶⡶⠶⠶⠶⣶⣾⣿⣶⣶⣶⣶⣶⣶⣶⣶
+⣿⣿⣿⣿⣿⣿⠋⣠⣙⢤⣀⣆⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⠿⠿⢀⣉⣛⣼⡾⢇⡸⠿⠿⠿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣀  ⠈⠻⠦⠁⣠⠃⣴⣿⣗⣁⣃⣭⠻⣿⣿⣿
+⣿⣿⣿⣿⣿⣶⣶⡶⠒⠛⣁⢆⠈⠿⡙⡿⣿⠻⠐⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣳⡀⠘⠉⣽⡎⢺⣄⡀ ⠋⠋⣠⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣮⣢⣄⣀⣁⣀⣈⣹⣤⣶⣿⣿⣿⣿⣿
+```
+
+the more often the `-a`/`--smooth` option gets repeated the more noise gets
+removed by repeatedly applying a median filter.
+
+```bash
+python p.py eppels.png -t 5 -aaa
+```
+
+```output
+⣿⣿⣿⣶⣶⣶⣶⡶⠶⠶⠶⣿⣿⣿⣿⣶⣶⣶⣶⣶⣶⣶
+⣿⣿⣿⣿⣿⣿⠋⣠⣿⣄⣠⣄⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⠿⠿⢀⣈⢻⣼⠿⣃⠸⠿⠿⠿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣀  ⠈⠻⠦ ⣠⠃⢴⣿⣿⣉⣁⣭⠻⣿⣿⣿
+⣿⣿⣿⣿⣿⣶⣶⡶⠒⠛⣁⣄⠘⠿⡛⡿⣿⠿ ⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣳⡀⠘⠉⢹⡎⠳⣄⡀⠸⠋⠋⣠⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣮⣢⣄⣀⣁⣀⣈⣩⣤⣶⣿⣿⣿⣿⣿
+```
+
+<!--- vim: set ts=2 sw=2 tw=80 et ft=markdown : -->
