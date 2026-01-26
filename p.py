@@ -400,7 +400,7 @@ def test_cli_help(
 def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         outfile = pathlib.Path(tmp) / 'fya.txt'
-        main(f'shelly.jpg -o {outfile}'.split())
+        main(f'eppels.png -o {outfile}'.split())
         assert outfile.exists()
         with pytest.raises(SystemExit):
             main(f'irrelevant.jpg -o {outfile}'.split())
