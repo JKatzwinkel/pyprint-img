@@ -1,5 +1,6 @@
 import argparse
 import fcntl
+import io
 import os
 import pathlib
 import struct
@@ -8,13 +9,26 @@ import tempfile
 import termios
 import textwrap
 import unicodedata
-from typing import Callable
+from typing import Any, Callable, Self
 
 from PIL import Image, ImageFilter
 
 from unittest import mock
 
 import pytest
+
+
+class Debug:
+    msgs: list[str] = []
+
+    @classmethod
+    def log(cls, msg: str) -> type[Self]:
+        cls.msgs.append(msg)
+        return cls
+
+    @classmethod
+    def show(cls, out: io.TextIOBase | Any) -> None:
+        print('\n'.join(cls.msgs), file=out)
 
 
 def terminal_rcwh() -> tuple[int, int, int, int]:
@@ -64,6 +78,7 @@ def percentile(histogram: list[int], percent: int = 50) -> int:
     for i, count in enumerate(histogram):
         if (acc := acc + count) >= target:
             break
+    Debug.log(f'{percent}th percentile at brightness level {i}')
     return i
 
 
@@ -86,8 +101,9 @@ def thr_const_factory(
 
 def thr_btw_extr_factory(image: Image.Image, _: int | None) -> ThresholdFunc:
     threshold = sum(
-        image.convert('L').getextrema()  # type: ignore[arg-type]
+        (extrema := image.convert('L').getextrema())  # type: ignore[arg-type]
     ) / 2
+    Debug.log(f'min/max brightness {extrema} -> threshold={threshold}')
     return lambda pixel: threshold
 
 
@@ -107,6 +123,11 @@ def thr_local_avg_factory(
     averaged = image.filter(
         ImageFilter.GaussianBlur(blur_radius)
     ).convert('L')
+    Debug.log(f'gaussian blur radius for `local` mode: {blur_radius}')
+    Debug.log(
+        'min/max threshold values used in `local` mode: '
+        f'{averaged.getextrema()}'
+    )
     return threshold
 
 
@@ -138,17 +159,25 @@ def rasterize(
     r, c, w, h = rcwh_func()
     cw, ch = w / c, h / r
     sx, sy = cw / 2, ch / 4
-    result: list[list[str]] = [[]]
-    max_row = int(image.height / ch) if not crop_y else min(
-        int(image.height / ch), r
+    Debug.log(
+        f'xterm window dimensions: {w}×{h} pixels, {c}×{r} characters'
+    ).log(
+        f'character size in pixels: {cw:.2f}×{ch:.2f}'
+    ).log(
+        f'sample rate in pixels: {sx:.2f} horizontal, {sy:.2f} vertical'
     )
-    max_col = int(min(image.width / cw, c))
     image = image.convert('L')
     while antialias:
         antialias -= 1
         image = image.filter(
             ImageFilter.MedianFilter(size=int(min(sx, sy) / 2) * 2 + 1)
         )
+    max_row = int(image.height / ch) if not crop_y else min(
+        int(image.height / ch), r
+    )
+    max_col = int(min(image.width / cw, c))
+    Debug.log(f'using {max_col} columns × {max_row} rows')
+    result: list[list[str]] = [[]]
     for y in range(max_row):
         py = y * ch
         for x in range(max_col):
@@ -162,6 +191,7 @@ def scale_image(image: Image.Image, zoom_factor: float = -1) -> Image.Image:
     if zoom_factor <= 0:
         r, c, w, h = terminal_rcwh()
         zoom_factor = w / image.width
+    Debug.log(f'resize image to {zoom_factor*100:.1f}%')
     return image.resize(
         (
             int(image.width * zoom_factor),
@@ -248,6 +278,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     argp.add_argument(
         'inputfile', type=pathlib.Path, metavar='FILE',
         help='path to input image file.',
+    )
+    argp.add_argument(
+        '-d', '--debug', action='store_true', dest='debug',
+        help='preceed normal output with debug log printed to /dev/stderr',
     )
     argp.add_argument(
         '-y', '--crop-y', dest='crop_y', action='store_true',
@@ -393,6 +427,13 @@ def test_cli_help(
         )
 
 
+def test_cli_debug_output(capsys: pytest.CaptureFixture[str]) -> None:
+    main('eppels.png -z .5 -o /dev/null -f -d'.split())
+    stderr = capsys.readouterr().err
+    assert 'resize image to 50.0%' in stderr
+    assert 'image dimensions: 202×151' in stderr
+
+
 @mock.patch(
     f'{__name__}.terminal_rcwh',
     side_effect=lambda: (44, 174, 1914, 1012),
@@ -416,22 +457,26 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
             file=sys.stderr
         )
         sys.exit(1)
-    im = Image.open(options.inputfile).copy()
+    image = Image.open(options.inputfile).copy()
+    Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
     if options.fit_to_width or options.zoom_factor:
-        im = scale_image(im, options.zoom_factor)
-    cc = rasterize(
-        im, inverted=options.invert,
+        image = scale_image(image, options.zoom_factor)
+    rows = rasterize(
+        image,
+        inverted=options.invert,
         crop_y=options.crop_y,
         antialias=options.antialias,
-        threshold_func=get_threshold_func(im, options),
+        threshold_func=get_threshold_func(image, options),
         adjust_brightness=options.brightness / 100,
         rcwh_func=get_terminal_rcwh_func(),
     )
     options.outputfile.touch(
         mode=0o644, exist_ok=options.output_overwrite,
     )
+    if options.debug:
+        Debug.show(sys.stderr)
     with options.outputfile.open('w') as f:
-        print('\n'.join(cc), file=f)
+        print('\n'.join(rows), file=f)
     return 0
 
 
