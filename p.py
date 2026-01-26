@@ -117,7 +117,7 @@ def rasterize(
     antialias: int = 0,
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
-    rchw_func: Callable[
+    rcwh_func: Callable[
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
 ) -> list[str]:
@@ -135,7 +135,7 @@ def rasterize(
         return unicodedata.lookup(char_name(matrix, inverted=inverted))
 
     threshold: ThresholdFunc = threshold_func or thr_btw_extr_factory(image, 0)
-    r, c, w, h = rchw_func()
+    r, c, w, h = rcwh_func()
     cw, ch = w / c, h / r
     sx, sy = cw / 2, ch / 4
     result: list[list[str]] = [[]]
@@ -425,7 +425,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         antialias=options.antialias,
         threshold_func=get_threshold_func(im, options),
         adjust_brightness=options.brightness / 100,
-        rchw_func=get_terminal_rcwh_func(),
+        rcwh_func=get_terminal_rcwh_func(),
     )
     options.outputfile.touch(
         mode=0o644, exist_ok=options.output_overwrite,
