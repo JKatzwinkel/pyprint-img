@@ -29,7 +29,7 @@ def terminal_rcwh() -> tuple[int, int, int, int]:
 def get_terminal_rcwh_func() -> Callable[[], tuple[int, int, int, int]]:
     if sys.stdout.isatty() and os.environ.get('DISPLAY'):
         return terminal_rcwh
-    return lambda: (44, 174, 1914, 1012)
+    return lambda: (44, 174, 1723, 911)
 
 
 def char_name(matrix: list[bool], inverted: bool = False) -> str:

@@ -17,7 +17,7 @@ update-manual:
     tmpfile=$(mktemp)
     echo "${cmd}"
     bash -c "${cmd} -fo ${tmpfile}"
-    sed -i -ne $(( lineno+1 ))',/```$/ {/```output/ {p; r'"${tmpfile}" \
+    sed -i -ne $(( lineno+2 ))',/```$/ {/```output/ {p; r'"${tmpfile}" \
       -e ':a; n; /```$/ {p; b}; ba}}; p' readme.md
   done
 
