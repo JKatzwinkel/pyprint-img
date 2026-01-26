@@ -34,12 +34,12 @@ def char_name(matrix: list[bool], inverted: bool = False) -> str:
     'BRAILLE PATTERN DOTS-14'
 
     >>> char_name([])
-    'En space'
+    'SPACE'
     '''
     key = ''.join(
         f'{i+1}' for i, b in enumerate(matrix) if b != inverted
     )
-    return f'BRAILLE PATTERN DOTS-{key}' if key else 'En space'
+    return f'BRAILLE PATTERN DOTS-{key}' if key else 'SPACE'
 
 
 def percentile(histogram: list[int], percent: int = 50) -> int:
