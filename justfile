@@ -4,6 +4,20 @@ update-manual:
   #!/usr/bin/env bash
   sed -i -ne '/```help/ {p; r'<(python p.py -h) \
     -e ':a; n; /```/ {p; b}; ba}; p' readme.md
+  readarray examples < <(
+    sed -ne '/```bash/ {:a;n;p;n; /```$/ {=;b}; ba}; ' readme.md | \
+    sed 'N;s/\n/:::/'
+  )
+  for example in "${examples[@]}"; do
+    cmd="${example%:::*}"
+    lineno=$(echo -n "${example#*:::}" | tr -d '\n')
+    tmpfile=$(mktemp)
+    echo "${cmd}"
+    bash -c "${cmd} -fo ${tmpfile}"
+    [[ $! -eq 0 ]] || exit 1
+    sed -i -ne $(( lineno+1 ))',/```$/ {/```output/ {p; r'"${tmpfile}" \
+      -e ':a; n; /```$/ {p; b}; ba}}; p' readme.md
+  done
 
 # run pytest
 test pytest_args='':

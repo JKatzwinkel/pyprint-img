@@ -50,7 +50,7 @@ jobs:
 
       - run: pip install -r requirements.txt pytest
 
-      - name: write output of --help into readme.md
+      - name: re-generate cli output examples in readme file
         run: just update-manual
 
       - name: see if something changed
@@ -72,7 +72,7 @@ jobs:
           git config user.email "${GIT_MAIL}"
           git config user.name "github-actions[bot]"
           git add readme.md
-          git commit -m "doc: update usage instructions in readme.md"
+          git commit -m ":memo: update usage instructions && examples"
           git push
 
 ...
