@@ -148,6 +148,19 @@ def rasterize(
     return [''.join(row) for row in result if row]
 
 
+def scale_image(image: Image.Image, zoom_factor: float = -1) -> Image.Image:
+    if zoom_factor <= 0:
+        r, c, w, h = terminal_rcwh()
+        zoom_factor = w / image.width
+    return image.resize(
+        (
+            int(image.width * zoom_factor),
+            int(image.height * zoom_factor)
+        ),
+        resample=Image.Resampling.LANCZOS,
+    )
+
+
 THRESHOLD_FUNC_FACTORIES: dict[
     str, tuple[ThresholdFuncFactory, tuple[int, int] | None, int | None]
 ] = {
@@ -179,6 +192,12 @@ def thr_arg_value_range_constraints(
             f'value must be between {" and ".join(map(str, value_range))}'
         )
     return check
+
+
+def non_negative_float(src: str) -> float:
+    if (value := float(src)) > 0:
+        return value
+    raise ValueError(f'{value} must be positive')
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -222,7 +241,22 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     argp.add_argument(
         '-y', '--crop-y', dest='crop_y', action='store_true',
-        help='crop image to terminal height',
+        help='crop image to terminal height.',
+    )
+    argp_scale_group = argp.add_argument_group(
+        'resizing options'
+    ).add_mutually_exclusive_group()
+    argp_scale_group.add_argument(
+        '-x', '--fit-x', dest='fit_to_width', action='store_true',
+        help=(
+            'scale image so it fits into the terminal window horizontally '
+            '(default: %(default)s).'
+        ),
+    )
+    argp_scale_group.add_argument(
+        '-z', '--zoom', dest='zoom_factor', type=non_negative_float,
+        default=0, metavar='FACTOR',
+        help='factor by which input image should be scaled in size.',
     )
     argp.add_argument(
         '-v', '--invert', dest='invert', action='store_true',
@@ -284,9 +318,16 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         ('f.png -aaa', False),
         ('-m const -t 256 f.png', True),
         ('-m const -t 128 f.png', False),
+        ('--thresh median f.png', True),
+        ('--inv f.png', False),
         ('-m percentile -t 128 f.pn', True),
         ('-m local f.png', False),
         ('-m local -t fya f.png', True),
+        ('--fit f.png', False),
+        ('-z 2 -x f.png', True),
+        ('-z -1.2 f.png', True),
+        ('-z fya f.png', True),
+        ('-z 1.2 f.png', False),
     )
 )
 def test_parse_args(argv: str, error: bool) -> None:
@@ -360,7 +401,9 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
             file=sys.stderr
         )
         sys.exit(1)
-    im = Image.open(options.inputfile)
+    im = Image.open(options.inputfile).copy()
+    if options.fit_to_width or options.zoom_factor:
+        im = scale_image(im, options.zoom_factor)
     cc = rasterize(
         im, inverted=options.invert,
         crop_y=options.crop_y,
