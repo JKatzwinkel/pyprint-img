@@ -1,7 +1,9 @@
 # print images to terminal
 
 ```help
-usage: p.py [-h] [-m MODE] [-o FILE] [-y] [-v] [-a] [-f] [-t NUM] FILE
+usage: p.py [-h] [-m MODE] [-o FILE] [-y] [-x | -z FACTOR] [-v] [-a] [-f]
+            [-t NUM]
+            FILE
 
 rasterize an image into the terminal.
 
@@ -14,7 +16,7 @@ options:
                         [extremes|median|percentile|const|local] (default:
                         local)
   -o, --output FILE     output file (default: /dev/stdout).
-  -y, --crop-y          crop image to terminal height
+  -y, --crop-y          crop image to terminal height.
   -v, --invert          rasterize a negative of the image
   -a, --smooth          smooth input image a little bit based on the sample
                         rate. might be a good idea for images with a lot
@@ -27,4 +29,9 @@ options:
                         --threshold option). required if selected threshold
                         mode is "percentile" or "const". threshold mode
                         "local" allows values between 0 and 9999.
+
+resizing options:
+  -x, --fit-x           scale image so it fits into the terminal window
+                        horizontally (default: False).
+  -z, --zoom FACTOR     factor by which input image should be scaled in size.
 ```
