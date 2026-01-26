@@ -2,6 +2,7 @@
 with the output of running cli --help again")]
 update-manual:
   #!/usr/bin/env bash
+  set -euxo pipefail
   sed -i -ne '/```help/ {p; r'<(python p.py -h) \
     -e ':a; n; /```/ {p; b}; ba}; p' readme.md
   readarray examples < <(
@@ -14,7 +15,6 @@ update-manual:
     tmpfile=$(mktemp)
     echo "${cmd}"
     bash -c "${cmd} -fo ${tmpfile}"
-    [[ $! -eq 0 ]] || exit 1
     sed -i -ne $(( lineno+1 ))',/```$/ {/```output/ {p; r'"${tmpfile}" \
       -e ':a; n; /```$/ {p; b}; ba}}; p' readme.md
   done
