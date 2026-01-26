@@ -119,7 +119,9 @@ def thr_local_avg_factory(
             result := averaged.getpixel(pixel), int  # type: ignore[arg-type]
         )
         return result
-    blur_radius = blur_radius or min(image.width, image.height) // 10
+    blur_radius = blur_radius or max(
+        25, min(image.width, image.height) // 20
+    )
     averaged = image.filter(
         ImageFilter.GaussianBlur(blur_radius)
     ).convert('L')
