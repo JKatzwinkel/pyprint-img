@@ -115,6 +115,7 @@ def rasterize(
     inverted: bool = False,
     crop_y: bool = False,
     antialias: int = 0,
+    adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
     rchw_func: Callable[
         [], tuple[int, int, int, int]
@@ -130,7 +131,7 @@ def rasterize(
             pixel = x1 + dx * sx, y1 + dy * sy
             pixelvalue = image.getpixel(pixel) or 0  # type: ignore[arg-type]
             assert isinstance(pixelvalue, int), f'{pixelvalue}'
-            matrix.append(pixelvalue > threshold(pixel))
+            matrix.append(pixelvalue * adjust_brightness >= threshold(pixel))
         return unicodedata.lookup(char_name(matrix, inverted=inverted))
 
     threshold: ThresholdFunc = threshold_func or thr_btw_extr_factory(image, 0)
@@ -269,7 +270,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     argp.add_argument(
         '-v', '--invert', dest='invert', action='store_true',
-        help='rasterize a negative of the image',
+        help="use the input image's negative.",
     )
     argp.add_argument(
         '-a', '--smooth', dest='antialias', action='count', default=0,
@@ -279,6 +280,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
             'detail but is slow. Can be repeated '
             '(default: %(default)d).'
         ),
+    )
+    argp.add_argument(
+        '-b', '--brightness', dest='brightness', type=int,
+        default=100, metavar='LEVEL', choices=range(200),
+        help='adjust brightness in percent (default: %(default)d).',
     )
     argp.add_argument(
         '-f', '--force', dest='output_overwrite', action='store_true',
@@ -418,6 +424,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         crop_y=options.crop_y,
         antialias=options.antialias,
         threshold_func=get_threshold_func(im, options),
+        adjust_brightness=options.brightness / 100,
         rchw_func=get_terminal_rcwh_func(),
     )
     options.outputfile.touch(
