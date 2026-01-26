@@ -1,5 +1,6 @@
 import argparse
 import fcntl
+import os
 import pathlib
 import struct
 import sys
@@ -23,6 +24,12 @@ def terminal_rcwh() -> tuple[int, int, int, int]:
             struct.pack('HHHH', 0, 0, 0, 0)
         )
     )
+
+
+def get_terminal_rcwh_func() -> Callable[[], tuple[int, int, int, int]]:
+    if sys.stdout.isatty() and os.environ.get('DISPLAY'):
+        return terminal_rcwh
+    return lambda: (44, 174, 1914, 1012)
 
 
 def char_name(matrix: list[bool], inverted: bool = False) -> str:
@@ -127,7 +134,7 @@ def rasterize(
         return unicodedata.lookup(char_name(matrix, inverted=inverted))
 
     threshold: ThresholdFunc = threshold_func or thr_btw_extr_factory(image, 0)
-    r, c, w, h = terminal_rcwh()
+    r, c, w, h = rchw_func()
     cw, ch = w / c, h / r
     sx, sy = cw / 2, ch / 4
     result: list[list[str]] = [[]]
@@ -411,6 +418,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         crop_y=options.crop_y,
         antialias=options.antialias,
         threshold_func=get_threshold_func(im, options),
+        rchw_func=get_terminal_rcwh_func(),
     )
     options.outputfile.touch(
         mode=0o644, exist_ok=options.output_overwrite,
