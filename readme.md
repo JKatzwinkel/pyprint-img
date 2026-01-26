@@ -18,7 +18,8 @@ options:
   -v, --invert          rasterize a negative of the image
   -a, --smooth          smooth input image a little bit based on the sample
                         rate. might be a good idea for images with a lot
-                        highly contrasted detail but is slow (default: False).
+                        highly contrasted detail but is slow. Can be repeated
+                        (default: 0).
   -f, --force           overwrite existing output file (default: True for
                         /dev/stdout).
   -t, --threshold-arg NUM
