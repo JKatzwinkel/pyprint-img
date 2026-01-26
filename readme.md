@@ -1,7 +1,7 @@
 # print images to terminal
 
 ```help
-usage: p.py [-h] [-m MODE] [-o FILE] [-y] [-x | -z FACTOR] [-v] [-a]
+usage: p.py [-h] [-m MODE] [-o FILE] [-d] [-y] [-x | -z FACTOR] [-v] [-a]
             [-b LEVEL] [-f] [-t NUM]
             FILE
 
@@ -16,6 +16,8 @@ options:
                         [extremes|median|percentile|const|local] (default:
                         local)
   -o, --output FILE     output file (default: /dev/stdout).
+  -d, --debug           preceed normal output with debug log printed to
+                        /dev/stderr
   -y, --crop-y          crop image to terminal height.
   -v, --invert          use the input image's negative.
   -a, --smooth          smooth input image a little bit based on the sample
