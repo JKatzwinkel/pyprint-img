@@ -105,7 +105,7 @@ def rasterize(
     image: Image.Image,
     inverted: bool = False,
     crop_y: bool = False,
-    antialias: bool = False,
+    antialias: int = 0,
     threshold_func: ThresholdFunc | None = None,
     rchw_func: Callable[
         [], tuple[int, int, int, int]
@@ -134,14 +134,16 @@ def rasterize(
     )
     max_col = int(min(image.width / cw, c))
     image = image.convert('L')
-    if antialias:
+    while antialias:
+        antialias -= 1
         image = image.filter(
-            ImageFilter.MedianFilter(size=int(sx / 2) * 2 + 1)
+            ImageFilter.MedianFilter(size=int(min(sx, sy) / 2) * 2 + 1)
         )
     for y in range(max_row):
+        py = y * ch
         for x in range(max_col):
-            pixel = x * cw, y * ch
-            result[-1].append(sample(*pixel))
+            px = x * cw
+            result[-1].append(sample(px, py))
         result.append([])
     return [''.join(row) for row in result if row]
 
@@ -227,12 +229,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help='rasterize a negative of the image',
     )
     argp.add_argument(
-        '-a', '--smooth', dest='antialias', action='store_true', default=False,
+        '-a', '--smooth', dest='antialias', action='count', default=0,
         help=(
             'smooth input image a little bit based on the sample rate. '
             'might be a good idea for images with a lot highly contrasted '
-            'detail but is slow '
-            '(default: %(default)s).'
+            'detail but is slow. Can be repeated '
+            '(default: %(default)d).'
         ),
     )
     argp.add_argument(
@@ -279,6 +281,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 @pytest.mark.parametrize(
     'argv, error', (
         ('-m median', True),
+        ('f.png -aaa', False),
         ('-m const -t 256 f.png', True),
         ('-m const -t 128 f.png', False),
         ('-m percentile -t 128 f.pn', True),
@@ -350,7 +353,6 @@ def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
 
 def main(argv: list[str] = sys.argv[1:]) -> int:
     options = parse_args(argv)
-    print(options)
     if not options.output_overwrite and options.outputfile.exists():
         print(
             f'output file {options.outputfile} already exists! '
