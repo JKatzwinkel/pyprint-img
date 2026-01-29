@@ -14,10 +14,8 @@ update-manual:
   for example in "${examples[@]}"; do
     cmd="${example%:::*}"
     lineno=$(echo -n "${example#*:::}" | tr -d '\n')
-    tmpfile=$(mktemp)
     echo "${cmd}"
-    bash -c "${cmd} -fo ${tmpfile}"
-    sed -i -ne $(( lineno+2 ))',/```$/ {/```output/ {p; r'"${tmpfile}" \
+    sed -i -ne $((lineno+2))',/```$/ {/```output/ {p; r'<($cmd) \
       -e ':a; n; /```$/ {p; b}; ba}}; p' readme.md
   done
 
