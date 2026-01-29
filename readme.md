@@ -280,4 +280,27 @@ python p.py -m const -z 2 -t 160 eppels.png
 ```
 
 
+### dithering
+
+the `-e`/`--dither` option changes the degree to which the result of the
+monochrome mapping error function is being distributed to neighboring pixels.
+
+```bash
+python p.py eppels.png -z 2 -e 1
+```
+
+```output
+```
+
+the default error preservation factor is `0` (no dithering), a value of `1`
+means that all of the error gets distributed (i.e. 75% because it is atkinson
+dithering).
+
+```bash
+python p.py eppels.png -z 2 -e .5
+```
+
+```output
+```
+
 <!--- vim: set ts=2 sw=2 tw=80 et ft=markdown : -->

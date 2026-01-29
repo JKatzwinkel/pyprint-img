@@ -347,6 +347,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help='adjust brightness in percent (default: %(default)d).',
     )
     argp.add_argument(
+        '-e', '--dither', dest='error_preservation_factor', type=float,
+        default=0, metavar='FACTOR',
+        help='error preservation factor/dithering ratio (default: %(default)s)',
+    )
+    argp.add_argument(
         '-f', '--force', dest='output_overwrite', action='store_true',
         default=(
             out_options.outputfile.resolve() == stdout_path.resolve()
@@ -492,6 +497,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         inverted=options.invert,
         crop_y=options.crop_y,
         antialias=options.antialias,
+        dither=options.error_preservation_factor,
         threshold_func=get_threshold_func(image, options),
         adjust_brightness=options.brightness / 100,
     )
