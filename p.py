@@ -138,6 +138,7 @@ def rasterize(
     inverted: bool = False,
     crop_y: bool = False,
     antialias: int = 0,
+    dither: float = 0,
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
     rcwh_func: Callable[
@@ -145,17 +146,11 @@ def rasterize(
     ] = terminal_rcwh,
 ) -> list[str]:
 
-    def sample(x1: float, y1: float) -> str:
-        matrix = []
-        for dx, dy in (
-            (0, 0), (0, 1), (0, 2), (1, 0),
-            (1, 1), (1, 2), (0, 3), (1, 3),
-        ):
-            pixel = x1 + dx * sx, y1 + dy * sy
-            pixelvalue = image.getpixel(pixel) or 0  # type: ignore[arg-type]
-            assert isinstance(pixelvalue, int), f'{pixelvalue}'
-            matrix.append(pixelvalue * adjust_brightness >= threshold(pixel))
-        return unicodedata.lookup(char_name(matrix, inverted=inverted))
+    def sample(x: float, y: float) -> int:
+        pixel = x * sx, y * sy
+        pixelvalue = image.getpixel(pixel) or 0  # type: ignore[arg-type]
+        assert isinstance(pixelvalue, int), f'{pixelvalue}'
+        return pixelvalue
 
     threshold: ThresholdFunc = threshold_func or thr_btw_extr_factory(image, 0)
     r, c, w, h = rcwh_func()
@@ -179,13 +174,45 @@ def rasterize(
     )
     max_col = int(min(image.width / cw, c))
     Debug.log(f'using {max_col} columns × {max_row} rows')
-    result: list[list[str]] = [[]]
-    for y in range(max_row):
-        py = y * ch
-        for x in range(max_col):
-            px = x * cw
-            result[-1].append(sample(px, py))
+    grid: list[list[float]] = [
+        [sample(x, y) for x in range(max_col * 2)]
+        for y in range(max_row * 4)
+    ]
+    neighbors = [
+        (1, 0), (2, 0), (-1, 1), (0, 1), (1, 1), (0, 2),
+    ]
+    mono = []
+    for y in range(max_row * 4):
+        for x in range(max_col * 2):
+            approx = (value := grid[y][x]) * adjust_brightness >= threshold(
+                (sx * x, sy * y)
+            )
+            mono.append(approx)
+            error = value - (255 * approx)
+            for dx, dy in neighbors:
+                if x + dx >= max_col * 2:
+                    continue
+                if x + dx < 0:
+                    continue
+                if y + dy >= max_row * 4:
+                    continue
+                grid[y + dy][x + dx] += error / 8 * dither
+    result: list[list[str]] = []
+    for cy in range(max_row):
         result.append([])
+        for cx in range(max_col):
+            registers = [
+                mono[
+                    cy * max_col * 8 + dy * max_col * 2 + cx * 2 + dx
+                ]
+                for dx, dy in (
+                    (0, 0), (0, 1), (0, 2), (1, 0),
+                    (1, 1), (1, 2), (0, 3), (1, 3),
+                )
+            ]
+            result[-1].append(
+                unicodedata.lookup(char_name(registers, inverted=inverted))
+            )
     return [''.join(row) for row in result if row]
 
 
