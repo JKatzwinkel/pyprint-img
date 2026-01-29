@@ -1,7 +1,6 @@
 import argparse
 import fcntl
 import io
-import os
 import pathlib
 import struct
 import sys
@@ -32,18 +31,16 @@ class Debug:
 
 
 def terminal_rcwh() -> tuple[int, int, int, int]:
-    return struct.unpack(
-        'HHHH', fcntl.ioctl(
-            0, termios.TIOCGWINSZ,
-            struct.pack('HHHH', 0, 0, 0, 0)
+    try:
+        return struct.unpack(
+            'HHHH', fcntl.ioctl(
+                0, termios.TIOCGWINSZ,
+                struct.pack('HHHH', 0, 0, 0, 0)
+            )
         )
-    )
-
-
-def get_terminal_rcwh_func() -> Callable[[], tuple[int, int, int, int]]:
-    if sys.stdout.isatty() and os.environ.get('DISPLAY'):
-        return terminal_rcwh
-    return lambda: (44, 174, 1723, 911)
+    except Exception as e:
+        Debug.log(f'could not determine terminal dimensions: {e}')
+    return (44, 174, 1723, 911)
 
 
 def char_name(matrix: list[bool], inverted: bool = False) -> str:
@@ -457,7 +454,7 @@ def test_cli_help(
 
 
 def test_cli_debug_output(capsys: pytest.CaptureFixture[str]) -> None:
-    main('eppels.png -z .5 -o /dev/null -f -d'.split())
+    main('eppels.png -z .5 -o /dev/null -f -d'.split())  # noqa: SIM905
     stderr = capsys.readouterr().err
     assert 'resize image to 50.0%' in stderr
     assert 'image dimensions: 202×151' in stderr
@@ -497,7 +494,6 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         antialias=options.antialias,
         threshold_func=get_threshold_func(image, options),
         adjust_brightness=options.brightness / 100,
-        rcwh_func=get_terminal_rcwh_func(),
     )
     options.outputfile.touch(
         mode=0o644, exist_ok=options.output_overwrite,
