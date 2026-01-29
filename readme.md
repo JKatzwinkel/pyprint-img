@@ -2,7 +2,7 @@
 
 ```help
 usage: p.py [-h] [-m MODE] [-o FILE] [-d] [-y] [-x | -z FACTOR] [-v] [-a]
-            [-b LEVEL] [-f] [-t NUM]
+            [-b LEVEL] [-e FACTOR] [-f] [-t NUM]
             FILE
 
 rasterize an image into the terminal.
@@ -26,6 +26,7 @@ options:
                         (default: 0).
   -b, --brightness LEVEL
                         adjust brightness in percent (default: 100).
+  -e, --dither FACTOR   error preservation factor/dithering ratio (default: 0)
   -f, --force           overwrite existing output file (default: True for
                         /dev/stdout).
   -t, --threshold-arg NUM
@@ -290,6 +291,20 @@ python p.py eppels.png -z 2 -e 1
 ```
 
 ```output
+⣎⢷⡹⣞⢶⡳⣖⠶⣖⡶⢶⢶⢶⡶⣶⠶⣶⢶⡶⣶⢳⣏⣞⣳⣛⣮⢷⡶⣶⢶⡶⣶⠶⣶⢶⡶⣶⢶⡶⣶
+⣎⢷⡹⣎⢷⡹⣎⠿⣼⣹⢯⣞⡿⠘⣃⠌⡉⠉⢉⠘⡻⢼⣭⢷⡻⣼⣳⢻⣼⣳⢻⣼⡻⡽⣞⣳⢯⢷⡻⣵
+⣎⢷⡹⢮⣳⡝⣾⡹⣧⢟⡾⠍⠀⡐⠄⠣⢄⡀⢂⡱⣌⢎⢻⡾⣝⣧⢿⣹⠶⣏⡿⣖⢿⣹⣳⢏⣿⡺⣝⣳
+⢮⡳⣏⡟⣶⢫⡷⣽⣭⢿⡽⠀⠐⡨⢙⡆⢣⠞⣣⢞⡱⢊⢼⣻⡽⢾⣭⢷⣻⡽⣳⢯⡯⣗⡯⣟⣶⢻⣝⣳
+⡳⣽⢺⣝⣞⡯⢷⣛⡞⠯⢛⠠⡁⠔⢡⢘⡡⢞⠱⣊⠖⡩⣸⣷⠻⠟⠾⢯⣷⣻⣽⣳⣻⣝⡾⣝⡾⣛⣞⡷
+⣝⡞⣧⡟⣮⠝⠃⠠⢀⠂⠄⠂⠱⡈⠆⠂⡔⠡⠒⢄⠪⠑⠡⣄⠳⡜⡅⢖⠢⢝⡚⡷⣽⡞⣽⡽⢾⡽⣾⣹
+⢮⡽⣞⡽⣆⠇⡌⠀⠄⠠⠀⠂⠀⠑⠨⠁⠄⢂⣡⡎⠀⢈⠱⣌⠻⡜⡜⡀⡐⣠⢱⣚⢦⡻⣷⣛⣯⢷⣏⡷
+⣏⢾⡵⣛⣮⢷⣜⣱⢢⢤⡐⣈⣀⣂⠐⣠⡜⡶⢫⠁⠄⠂⠡⢌⢣⠹⣘⠵⣱⣎⡷⣞⣧⢳⣩⣟⡾⣽⣺⡽
+⡞⣽⢺⣝⡮⢷⣫⣞⡟⣶⡻⣗⠷⡚⢉⠡⠐⡠⠡⠘⢠⠈⡐⠀⠊⠔⣁⠫⡅⢯⡙⠧⢎⡳⢼⣛⣾⢳⣗⣻
+⡽⣺⣝⣮⢽⣫⢗⡾⣹⣳⢟⣝⠢⢁⠂⠌⠠⢁⠂⠡⢂⠰⢀⠌⠐⠠⢀⠂⢍⠢⡙⠬⢣⡱⣯⣟⢾⣻⣼⣳
+⣳⣝⠾⣼⡳⣏⣟⡞⣷⣭⢿⣬⢳⡠⠈⠄⡁⠂⠌⡐⢀⠂⠈⠤⢁⠄⡀⠈⠄⢂⠑⡨⣡⣾⢷⣫⢿⡵⣞⣳
+⡳⣞⣻⡵⣻⣝⡮⣟⢾⡼⣻⣼⡳⣜⢣⢤⡀⠁⢂⠀⠂⢈⠀⠄⠀⠒⠠⣩⡴⣦⢾⡽⣯⢟⡾⣽⣳⣻⣭⢷
+⣝⡧⣷⢫⡷⣞⡽⣞⢯⣳⢟⣶⣻⡽⣫⢶⣩⣓⠦⢦⡱⢤⢆⡖⣦⣫⢷⢯⡽⣏⣯⢟⣞⣯⢿⣱⢯⢷⡞⣯
+⣞⡽⣞⢯⡳⢯⡽⣞⣯⡽⣞⡧⢷⣻⢽⣫⠷⣯⢟⣯⢟⣯⢯⣻⡵⢯⣛⡾⣝⣳⣭⣟⡾⡵⣯⢯⣛⣯⣞⡷
 ```
 
 the default error preservation factor is `0` (no dithering), a value of `1`
