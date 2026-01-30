@@ -10,7 +10,7 @@ import textwrap
 import unicodedata
 from typing import Any, Callable, Self
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageChops, ImageFilter
 
 from unittest import mock
 
@@ -130,11 +130,29 @@ def thr_local_avg_factory(
     return threshold
 
 
+def sharpen(
+    image: Image.Image, factor: int, blur_radius: float
+) -> Image.Image:
+    if factor < 1:
+        return image
+    smot = image.filter(ImageFilter.GaussianBlur(blur_radius))
+    for chops, images in (
+        (ImageChops.add, (image, smot)), (ImageChops.subtract, (smot, image))
+    ):
+        image = chops(
+            image, ImageChops.subtract(*images).point(
+                lambda p: p * factor
+            )
+        )
+    Debug.log(f'edge emphasis by factor {factor}')
+    return image
+
+
 def rasterize(
     image: Image.Image,
     inverted: bool = False,
     crop_y: bool = False,
-    antialias: int = 0,
+    edging: int = 0,
     dither: float = 0,
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
@@ -160,12 +178,7 @@ def rasterize(
     ).log(
         f'sample rate in pixels: {sx:.2f} horizontal, {sy:.2f} vertical'
     )
-    image = image.convert('L')
-    while antialias:
-        antialias -= 1
-        image = image.filter(
-            ImageFilter.MedianFilter(size=int(min(sx, sy) / 2) * 2 + 1)
-        )
+    image = sharpen(image.convert('L'), edging, cw)
     max_row = int(image.height / ch) if not crop_y else min(
         int(image.height / ch), r
     )
@@ -307,7 +320,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     argp.add_argument(
         '-d', '--debug', action='store_true', dest='debug',
-        help='preceed normal output with debug log printed to /dev/stderr',
+        help='preceed normal output with debug log printed to /dev/stderr.',
     )
     argp.add_argument(
         '-y', '--crop-y', dest='crop_y', action='store_true',
@@ -333,12 +346,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="use the input image's negative.",
     )
     argp.add_argument(
-        '-a', '--smooth', dest='antialias', action='count', default=0,
+        '-a', '--sharpen', dest='sharpen', action='count', default=0,
         help=(
-            'smooth input image a little bit based on the sample rate. '
-            'might be a good idea for images with a lot highly contrasted '
-            'detail but is slow. Can be repeated '
-            '(default: %(default)d).'
+            'enhance input image by emphasizing edges a little '
+            '(the more often the option gets repeated, the more).'
         ),
     )
     argp.add_argument(
@@ -349,7 +360,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     argp.add_argument(
         '-e', '--dither', dest='error_preservation_factor', type=float,
         default=0, metavar='FACTOR',
-        help='error preservation factor/dithering ratio (default: %(default)s)',
+        help=(
+            'error preservation factor/dithering ratio (default: %(default)s).'
+        ),
     )
     argp.add_argument(
         '-f', '--force', dest='output_overwrite', action='store_true',
@@ -496,7 +509,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         image,
         inverted=options.invert,
         crop_y=options.crop_y,
-        antialias=options.antialias,
+        edging=options.sharpen,
         dither=options.error_preservation_factor,
         threshold_func=get_threshold_func(image, options),
         adjust_brightness=options.brightness / 100,
