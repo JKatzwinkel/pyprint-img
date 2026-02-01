@@ -48,7 +48,7 @@ jobs:
 
       - uses: extractions/setup-just@v3
 
-      - run: pip install -r requirements.txt pytest
+      - run: pip install -r requirements.txt
 
       - name: re-generate cli output examples in readme file
         run: just update-manual

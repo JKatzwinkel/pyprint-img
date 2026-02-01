@@ -22,7 +22,7 @@ update-manual:
 # run pytest
 test pytest_args='':
   python -mpytest --capture=sys --doctest-modules p.py --cov . \
-    --cov-report term-missing {{pytest_args}}
+    --cov-report term-missing {{pytest_args}} tests.py
 
 # run flake8
 lint flake8_args='':
