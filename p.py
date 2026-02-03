@@ -458,7 +458,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         Debug.show(sys.stderr)
     with options.outputfile.open('w') as f:
         for row in rows:
-            print(f'\033[1m\033[1;37m{row}\033[0m', file=f)
+            print(f'{row}', file=f)
     return 0
 
 
