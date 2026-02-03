@@ -115,8 +115,9 @@ def image() -> Image.Image:
     'method, pattern, expect', (
         ('atkinson', '⠳', True),
         ('atkinson', '⢕', False),
+        ('atkinson', '⡪⡪', False),
         ('atkinson', '⣺⡺', False),
-        ('floyd-steinberg', '⢕', True),
+        ('floyd-steinberg', '⡪⡪', True),
         ('floyd-steinberg', '⣺⡺', True),
     )
 )
