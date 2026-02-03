@@ -1,10 +1,12 @@
 import pathlib
 
+from PIL import Image
+
 from unittest import mock
 import tempfile
 import pytest
 
-from p import main, parse_args
+from p import main, parse_args, rasterize
 
 
 @pytest.mark.parametrize(
@@ -23,6 +25,10 @@ from p import main, parse_args
         ('-z -1.2 f.png', True),
         ('-z fya f.png', True),
         ('-z 1.2 f.png', False),
+        ('--dither .5 f.png', False),
+        ('--floyd -Datkinson f.png', True),
+        ('-Dfloyd f.png', True),
+        ('--fl f.png', False),
     )
 )
 def test_parse_args(argv: str, error: bool) -> None:
@@ -92,3 +98,40 @@ def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
         with pytest.raises(SystemExit):
             main(f'irrelevant.jpg -o {outfile}'.split())
         assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
+
+
+@pytest.fixture(scope='module')
+def image() -> Image.Image:
+    return (image := Image.open('eppels.png')).resize(
+        (
+            int(image.width * 1.6),
+            int(image.height * 1.6)
+        ),
+        resample=Image.Resampling.LANCZOS,
+    )
+
+
+@pytest.mark.parametrize(
+    'method, pattern, expect', (
+        ('atkinson', '⠳', True),
+        ('atkinson', '⢕', False),
+        ('atkinson', '⣺⡺', False),
+        ('floyd-steinberg', '⢕', True),
+        ('floyd-steinberg', '⣺⡺', True),
+    )
+)
+def test_dither_method(
+    image: Image.Image, method: str, pattern: str, expect: bool,
+) -> None:
+    result = ['']
+    for line in rasterize(
+        image, dither_method=method, dither=.7,
+        rcwh_func=lambda: (44, 174, 1914, 1012),
+    ):
+        result.append(line)
+        if pattern in line:
+            break
+    output = '\n'.join(result)
+    assertion = pattern in output if expect else pattern not in output
+    predicate = 'expected' if expect else 'not expected'
+    assert assertion, f'"{pattern}" {predicate} in {output}'

@@ -7,7 +7,7 @@ import sys
 import termios
 import textwrap
 import unicodedata
-from typing import Any, Callable, Self
+from typing import Any, Callable, Iterable, Self
 
 from PIL import Image, ImageChops, ImageFilter
 
@@ -143,18 +143,29 @@ def sharpen(
     return image
 
 
+DITHER_ERROR_RECIPIENTS = {
+    'atkinson': [
+        (1, 0, 2), (2, 0, 2), (-1, 1, 2), (0, 1, 2), (1, 1, 2), (0, 2, 2),
+    ],
+    'floyd-steinberg': [
+        (1, 0, 7), (-1, 1, 3), (0, 1, 5), (1, 1, 1),
+    ],
+}
+
+
 def rasterize(
     image: Image.Image,
     inverted: bool = False,
     crop_y: bool = False,
     edging: int = 0,
     dither: float = 0,
+    dither_method: str = 'atkinson',
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
     rcwh_func: Callable[
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
-) -> list[str]:
+) -> Iterable[str]:
 
     def sample(x: float, y: float) -> int:
         pixel = x * sx, y * sy
@@ -162,7 +173,19 @@ def rasterize(
         assert isinstance(pixelvalue, int), f'{pixelvalue}'
         return pixelvalue
 
-    threshold: ThresholdFunc = threshold_func or thr_btw_extr_factory(image, 0)
+    error_recipients = DITHER_ERROR_RECIPIENTS[dither_method]
+
+    def dither_victims(x: int, y: int, error: float) -> Iterable[
+        tuple[int, int, float]
+    ]:
+        for dx, dy, weight in error_recipients:
+            if not 0 <= (rx := x + dx) < max_col * 2:
+                continue
+            if (ry := y + dy) >= max_row * 4:
+                continue
+            yield rx, ry, weight
+
+    threshold = threshold_func or thr_local_avg_factory(image, 0)
     r, c, w, h = rcwh_func()
     cw, ch = w / c, h / r
     sx, sy = cw / 2, ch / 4
@@ -183,9 +206,6 @@ def rasterize(
         [sample(x, y) for x in range(max_col * 2)]
         for y in range(max_row * 4)
     ]
-    neighbors = [
-        (1, 0), (2, 0), (-1, 1), (0, 1), (1, 1), (0, 2),
-    ]
     mono = []
     for y in range(max_row * 4):
         for x in range(max_col * 2):
@@ -193,32 +213,25 @@ def rasterize(
                 (sx * x, sy * y)
             )
             mono.append(approx)
-            error = value - (255 * approx)
-            for dx, dy in neighbors:
-                if x + dx >= max_col * 2:
-                    continue
-                if x + dx < 0:
-                    continue
-                if y + dy >= max_row * 4:
-                    continue
-                grid[y + dy][x + dx] += error / 8 * dither
-    result: list[list[str]] = []
+            error = (value - (247 * approx)) * dither / 16
+            for dx, dy, weight in dither_victims(x, y, error):
+                grid[dy][dx] += error * weight
     for cy in range(max_row):
-        result.append([])
+        row: list[str] = []
         for cx in range(max_col):
             registers = [
                 mono[
-                    cy * max_col * 8 + dy * max_col * 2 + cx * 2 + dx
+                    max_col * 2 * (cy * 4 + dy) + cx * 2 + dx
                 ]
                 for dx, dy in (
                     (0, 0), (0, 1), (0, 2), (1, 0),
                     (1, 1), (1, 2), (0, 3), (1, 3),
                 )
             ]
-            result[-1].append(
+            row.append(
                 unicodedata.lookup(char_name(registers, inverted=inverted))
             )
-    return [''.join(row) for row in result if row]
+        yield ''.join(row)
 
 
 def scale_image(image: Image.Image, zoom_factor: float = -1) -> Image.Image:
@@ -314,6 +327,16 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help='path to input image file.',
     )
     argp.add_argument(
+        '-f', '--force', dest='output_overwrite', action='store_true',
+        default=(
+            out_options.outputfile.resolve() == stdout_path.resolve()
+        ),
+        help=(
+            'overwrite existing output file '
+            f'(default: %(default)s for {out_options.outputfile}).'
+        ),
+    )
+    argp.add_argument(
         '-d', '--debug', action='store_true', dest='debug',
         help='preceed normal output with debug log printed to /dev/stderr.',
     )
@@ -352,22 +375,27 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default=100, metavar='LEVEL', choices=range(200),
         help='adjust brightness in percent (default: %(default)d).',
     )
-    argp.add_argument(
+    argp_dither = argp.add_argument_group('dithering options')
+    argp_dither.add_argument(
         '-e', '--dither', dest='error_preservation_factor', type=float,
         default=0, metavar='FACTOR',
         help=(
             'error preservation factor/dithering ratio (default: %(default)s).'
         ),
     )
-    argp.add_argument(
-        '-f', '--force', dest='output_overwrite', action='store_true',
-        default=(
-            out_options.outputfile.resolve() == stdout_path.resolve()
-        ),
+    argp_dither_method = argp_dither.add_mutually_exclusive_group()
+    argp_dither_method.add_argument(
+        '-D', '--dmethod', dest='dither_method', metavar='METH',
+        choices=('atkinson', 'floyd-steinberg'), default='atkinson',
         help=(
-            'overwrite existing output file '
-            f'(default: %(default)s for {out_options.outputfile}).'
+            'dither method to use ('
+            f'one of {"|".join(DITHER_ERROR_RECIPIENTS.keys())}, '
+            'default: %(default)s).'
         ),
+    )
+    argp_dither_method.add_argument(
+        '--floyd', dest='dither_method', action='store_const',
+        const='floyd-steinberg', help='shortcut for -Dfloyd-steinberg',
     )
     thr_arg_help = (
         'value to be passed to the threshold function '
@@ -419,6 +447,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         crop_y=options.crop_y,
         edging=options.sharpen,
         dither=options.error_preservation_factor,
+        dither_method=options.dither_method,
         threshold_func=get_threshold_func(image, options),
         adjust_brightness=options.brightness / 100,
     )
@@ -428,7 +457,8 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
     if options.debug:
         Debug.show(sys.stderr)
     with options.outputfile.open('w') as f:
-        print('\n'.join(rows), file=f)
+        for row in rows:
+            print(f'\033[1m\033[1;37m{row}\033[0m', file=f)
     return 0
 
 

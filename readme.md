@@ -37,7 +37,17 @@ options:
 resizing options:
   -x, --fit-x           scale image so it fits into the terminal window
                         horizontally (default: False).
-  -z, --zoom FACTOR     factor by which input image should be scaled in size.
+  -z FACTOR, --zoom FACTOR
+                        factor by which input image should be scaled in size.
+
+dithering options:
+  -e FACTOR, --dither FACTOR
+                        error preservation factor/dithering ratio (default:
+                        0).
+  -D METH, --dmethod METH
+                        dither method to use (one of atkinson|floyd-steinberg,
+                        default: atkinson).
+  --floyd               shortcut for -Dfloyd-steinberg
 ```
 
 
@@ -329,6 +339,29 @@ python p.py eppels.png -z 2 -e .5
 ⣝⢮⡟⣶⢻⣜⣳⡭⢷⣻⢷⣻⣶⣙⠦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠂⣤⣤⣤⣶⣿⣟⣷⣻⣞⡽⣝⣮⣻
 ⢮⣳⠽⣮⢗⣯⢶⣻⣭⢯⣟⣷⣻⢿⣽⣲⣭⢳⡒⣦⠴⣤⢤⢦⣖⣮⣿⢿⣻⢿⡽⣾⡽⣞⡷⣞⡽⣽⡲⢯
 ⣻⡼⣻⡝⠾⡭⢷⣛⣾⡻⣞⠷⣯⢟⡾⣽⣻⣟⣿⣻⢿⣻⣟⡿⣯⣟⡾⣏⣿⣹⡽⢧⣟⡽⣺⡝⣞⣳⡽⣏
+```
+
+floyd-steinberg dithering can be used as an alternative method.
+
+```bash
+python p.py eppels.png -z2 -e.5 --floyd
+```
+
+```output
+⣺⡺⣺⡺⣺⣲⣲⡲⣖⡶⡶⣶⢶⣶⣶⣶⡶⢶⣶⣶⣶⡶⣗⡷⣯⢯⡯⣷⣳⢷⢶⢶⢶⡶⣶⢶⡶⣶⢶⣶⣶⣶⣶⢶
+⣺⡺⣺⡪⣗⣗⢷⣝⣗⡯⣿⡽⣟⣷⠿⠛⡃⠩⠉⠉⠑⠛⠽⣯⢿⡽⣯⣗⡯⡿⡽⡯⡿⡽⣯⢿⡽⣯⢿⣺⣗⡿⣞⣿
+⣺⣺⣪⣻⡺⣮⣳⣳⣳⣻⢷⣟⡟⠁⠀⠡⢑⢄⠀⠀⠈⢌⢌⢎⢿⣯⢷⡯⣯⢿⢽⢯⢿⢽⢽⢽⢽⢽⢽⣺⣳⢯⣟⡾
+⣺⣺⡺⣮⣻⣺⣺⣺⣗⣿⣻⣿⠀⠀⠨⡘⡔⡔⡱⣕⣕⢵⢳⠱⡑⣿⣯⢿⡽⣯⢿⢽⢯⢿⢽⢽⢽⢽⢽⣺⣺⢽⢮⢯
+⡺⣮⣻⣺⣺⣺⣺⣗⣿⣽⢿⢷⠀⡀⠡⠈⠎⢎⢪⢪⢮⢪⢪⠢⣑⣿⣿⣿⣻⣽⡯⣿⢽⡯⡿⣽⢽⢽⢽⣺⣺⢽⢽⣝
+⣝⣞⣞⣞⣾⣺⡳⠝⠊⠊⠉⠁⠂⠢⠡⠡⡑⡑⠕⢕⢑⢑⢅⢇⠞⡛⡍⡍⡩⢩⣙⡛⡯⣿⣽⢽⡽⡽⣽⣺⣺⣝⣗⣗
+⣺⣺⣺⣺⡺⡪⠀⠀⠀⠀⠀⠀⠀⠁⢑⢑⢐⠈⠨⠐⠐⢄⠕⠀⠢⡪⡪⡮⡜⡄⠂⠈⠜⢰⡙⡯⡿⣽⣳⣳⣳⣳⣳⣳
+⣺⣺⣺⡺⣧⡣⡣⣀⠀⠀⠀⠀⠀⠀⠀⠀⠂⠈⠄⣌⣮⠇⠀⠀⡑⢕⢝⢜⢜⢤⢠⢠⢌⣖⢝⣞⢎⢷⣻⣺⣞⣞⣞⣞
+⣺⡺⡮⡯⣗⡯⣷⢵⣭⣣⣲⣔⢤⣤⣤⣐⡴⠜⠾⡙⡛⢄⠂⡀⠠⠡⡑⢕⠕⡝⡮⡺⣗⣯⣿⢺⢕⢕⣿⣺⣞⣞⣞⣞
+⢮⢯⢯⢯⣗⡯⡿⡽⣯⣟⣿⢿⣿⡻⡪⠃⠄⠅⠅⠢⠨⡀⠅⡐⠀⠀⠈⠄⠑⠌⡪⢪⢪⢺⢸⢱⢱⢱⣻⣞⣾⣺⣺⣺
+⢽⢽⣝⣗⣗⢯⢯⢯⣗⣿⣺⣯⢗⠕⡀⠀⠂⠈⡀⠅⠂⡐⢀⠈⡂⠅⠀⠀⠀⠀⠂⡑⢐⠡⡃⡣⢣⣳⣟⣾⣺⣞⣞⣞
+⣝⣗⣗⢷⢽⢽⢽⢽⣺⣺⣳⢿⣝⡕⣔⠀⠀⠀⠀⠀⠁⠠⠀⠀⠀⠑⠨⢀⠀⠀⠀⠠⠀⢐⢀⣪⣾⣻⣞⣷⣳⣳⣳⣳
+⣺⡺⡮⡯⡯⡯⣯⣻⣺⣺⢽⡯⣷⡽⣜⡕⡥⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠨⠠⣡⣢⣬⣶⡿⣯⣟⣷⣻⣞⣞⣞⣞⡮
+⢮⢯⢯⢯⢯⣻⣺⣺⣺⣺⢽⢽⣳⣟⡷⣟⣮⢮⢝⢖⡔⡤⣄⢤⡠⡤⡰⣔⣼⣵⢿⣻⡽⣷⣻⡽⣞⣷⣳⣳⣳⣳⡳⡯
 ```
 
 <!--- vim: set ts=2 sw=2 tw=80 et ft=markdown : -->
