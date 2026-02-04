@@ -37,6 +37,7 @@ font-preview:
 
 
 # run pytest
+[default]
 test pytest_args='':
   python -mpytest --capture=sys --doctest-modules p.py --cov . \
     --cov-report term-missing {{pytest_args}} tests.py
