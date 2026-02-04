@@ -37,16 +37,11 @@ font-preview:
 
 
 # take a screenshot && replace image file at screenshot.png
-take-screenshot: termshot
-  ./termshot -cf screenshot.png -- python p.py eppels.png -e.5 -yz2
-
-
-# install termshot
-termshot:
-  #!/usr/bin/env bash
-  curl -s --follow \
-    https://github.com/homeport/termshot/releases/download/v0.6.0/termshot_0.6.0_linux_amd64.tar.gz \
-    | tar -xvz termshot
+take-screenshot:
+  python p.py eppels.png -z2 -e.5 | \
+    magick -background indigo -fill white \
+    -font /usr/share/fonts/Adwaita/AdwaitaMono-Bold.ttf \
+    -size 800x -pointsize 30 caption:@- screenshot.png
 
 
 # run pytest
