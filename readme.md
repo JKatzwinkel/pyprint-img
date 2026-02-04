@@ -46,6 +46,15 @@ dithering options:
 ```
 
 
+## usage
+
+a font supporting the braille charset at codepoints `U+2800` through `U+28ff` is
+required. here are some examples of fonts with braille glyphs and what they look
+like:
+
+![](./fonts.png)
+
+
 ## examples
 
 example image:

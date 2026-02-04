@@ -19,6 +19,23 @@ update-manual:
       -e ':a; n; /```$/ {p; b}; ba}}; p' readme.md
   done
 
+
+# render preview for installed fonts supporting braille charset
+font-preview:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  tmpfile=$(mktemp)
+  echo "magick montage -geometry 420x120 -pointsize 72 \\" >> "${tmpfile}"
+  for ff in $(fc-list ':charset=2800' | cut -d: -f1); do
+    fn=$(fc-scan --format '%{fullname}' "${ff}")
+    echo "-font ${ff} -label '${fn}' label:⠈⠈⠳⣝⠧⡇ \\" >> "${tmpfile}"
+  done
+  echo "-tile 4x8 \\" >> "${tmpfile}"
+  echo "-font Arial -pointsize 24 -geometry +2+2 \\" >> "${tmpfile}"
+  echo "-frame 5 -bordercolor SkyBlue fonts.png" >> "${tmpfile}"
+  bash "${tmpfile}"
+
+
 # run pytest
 test pytest_args='':
   python -mpytest --capture=sys --doctest-modules p.py --cov . \
