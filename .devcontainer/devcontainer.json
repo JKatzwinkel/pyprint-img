@@ -1,0 +1,23 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/python:3.13-trixie",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ryanluker.vscode-coverage-gutters"
+      ],
+      "settings": {
+        "editor.renderWhitespace": "all",
+        "coverage-gutters.showLineCoverage": true,
+        "window.density.editorTabHeight": "compact"
+      }
+    }
+  }
+}
