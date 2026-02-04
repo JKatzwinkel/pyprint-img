@@ -113,7 +113,7 @@ def image() -> Image.Image:
 
 
 @pytest.mark.parametrize(
-    'method, pattern, expect', (
+    'method, pattern, expected', (
         ('atkinson', '⠳', True),
         ('atkinson', '⢕', False),
         ('atkinson', '⡪⡪', False),
@@ -123,7 +123,7 @@ def image() -> Image.Image:
     )
 )
 def test_dither_method(
-    image: Image.Image, method: str, pattern: str, expect: bool,
+    image: Image.Image, method: str, pattern: str, expected: bool,
 ) -> None:
     result = ['']
     for line in rasterize(
@@ -134,8 +134,8 @@ def test_dither_method(
         if pattern in line:
             break
     output = '\n'.join(result)
-    assertion = pattern in output if expect else pattern not in output
-    predicate = 'expected' if expect else 'not expected'
+    assertion = (pattern in output) is expected
+    predicate = 'expected' if expected else 'not expected'
     assert assertion, f'"{pattern}" {predicate} in {output}'
 
 

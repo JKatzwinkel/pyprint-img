@@ -7,7 +7,7 @@ import sys
 import termios
 import textwrap
 import unicodedata
-from typing import Any, Callable, Iterable, Self
+from typing import Any, Callable, Iterable, Literal, Self
 
 from PIL import Image, ImageChops, ImageFilter
 
@@ -160,7 +160,9 @@ def rasterize(
     crop_y: bool = False,
     edging: int = 0,
     dither: float = 0,
-    dither_method: str = 'atkinson',
+    dither_method: Literal[
+        'atkinson', 'floyd-steinberg',
+    ] = 'atkinson',
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
     rcwh_func: Callable[
