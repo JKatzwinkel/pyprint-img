@@ -84,6 +84,7 @@ def test_cli_debug_output(capsys: pytest.CaptureFixture[str]) -> None:
     stderr = capsys.readouterr().err
     assert 'resize image to 50.0%' in stderr
     assert 'image dimensions: 202×151' in stderr
+    assert 'window dimensions:' in stderr
 
 
 @mock.patch(

@@ -438,7 +438,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         sys.exit(1)
     image = Image.open(options.inputfile).copy()
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
-    rows = rasterize(
+    rows = list(rasterize(
         image,
         zoom=scale_image(image, options.zoom_factor),
         inverted=options.invert,
@@ -448,7 +448,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         dither_method=options.dither_method,
         threshold_func=get_threshold_func(image, options),
         adjust_brightness=options.brightness / 100,
-    )
+    ))
     options.outputfile.touch(
         mode=0o644, exist_ok=options.output_overwrite,
     )
