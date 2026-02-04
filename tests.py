@@ -6,7 +6,7 @@ from unittest import mock
 import tempfile
 import pytest
 
-from p import main, parse_args, rasterize
+from p import main, parse_args, scale_image, rasterize
 
 
 @pytest.mark.parametrize(
@@ -136,3 +136,23 @@ def test_dither_method(
     assertion = pattern in output if expect else pattern not in output
     predicate = 'expected' if expect else 'not expected'
     assert assertion, f'"{pattern}" {predicate} in {output}'
+
+
+def test_zoom(image: Image.Image) -> None:
+    for line in rasterize(image):
+        break
+    for line2x in rasterize(image, zoom=2.):
+        break
+    assert len(line) == len(line2x) // 2
+
+
+def test_fit_to_window(image: Image.Image) -> None:
+    rcwh_func = lambda: (11, 44, 1914, 1012)  # noqa: E731
+    lines = [
+        line for line in rasterize(
+            image, crop_y=True, rcwh_func=rcwh_func,
+            zoom=scale_image(image, 0, rcwh_func=rcwh_func),
+        )
+    ]
+    assert len(lines) == 11
+    assert len(lines[0]) == 44

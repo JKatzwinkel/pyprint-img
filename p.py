@@ -155,6 +155,7 @@ DITHER_ERROR_RECIPIENTS = {
 
 def rasterize(
     image: Image.Image,
+    zoom: float = 1,
     inverted: bool = False,
     crop_y: bool = False,
     edging: int = 0,
@@ -188,7 +189,7 @@ def rasterize(
     threshold = threshold_func or thr_local_avg_factory(image, 0)
     r, c, w, h = rcwh_func()
     cw, ch = w / c, h / r
-    sx, sy = cw / 2, ch / 4
+    sx, sy = cw / zoom / 2, ch / zoom / 4
     Debug.log(
         f'xterm window dimensions: {w}×{h} pixels, {c}×{r} characters'
     ).log(
@@ -197,10 +198,10 @@ def rasterize(
         f'sample rate in pixels: {sx:.2f} horizontal, {sy:.2f} vertical'
     )
     image = sharpen(image.convert('L'), edging, cw)
-    max_row = int(image.height / ch) if not crop_y else min(
-        int(image.height / ch), r
+    max_row = int(image.height * zoom / ch) if not crop_y else min(
+        int(image.height * zoom / ch), r
     )
-    max_col = int(min(image.width / cw, c))
+    max_col = int(min(image.width * zoom / cw, c))
     Debug.log(f'using {max_col} columns × {max_row} rows')
     grid: list[list[float]] = [
         [sample(x, y) for x in range(max_col * 2)]
@@ -234,18 +235,17 @@ def rasterize(
         yield ''.join(row)
 
 
-def scale_image(image: Image.Image, zoom_factor: float = -1) -> Image.Image:
+def scale_image(
+    image: Image.Image, zoom_factor: float,
+    rcwh_func: Callable[
+        [], tuple[int, int, int, int]
+    ] = terminal_rcwh,
+) -> float:
     if zoom_factor <= 0:
-        r, c, w, h = terminal_rcwh()
+        r, c, w, h = rcwh_func()
         zoom_factor = w / image.width
     Debug.log(f'resize image to {zoom_factor*100:.1f}%')
-    return image.resize(
-        (
-            int(image.width * zoom_factor),
-            int(image.height * zoom_factor)
-        ),
-        resample=Image.Resampling.LANCZOS,
-    )
+    return zoom_factor
 
 
 THRESHOLD_FUNC_FACTORIES: dict[
@@ -348,16 +348,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         'resizing options'
     ).add_mutually_exclusive_group()
     argp_scale_group.add_argument(
-        '-x', '--fit-x', dest='fit_to_width', action='store_true',
-        help=(
-            'scale image so it fits into the terminal window horizontally '
-            '(default: %(default)s).'
-        ),
+        '-z', '--zoom', dest='zoom_factor', type=non_negative_float,
+        default=1, metavar='FACTOR',
+        help='factor by which input image should be scaled in size.',
     )
     argp_scale_group.add_argument(
-        '-z', '--zoom', dest='zoom_factor', type=non_negative_float,
-        default=0, metavar='FACTOR',
-        help='factor by which input image should be scaled in size.',
+        '-x', '--fit-x', dest='zoom_factor', action='store_const', const=0,
+        help=(
+            'scale image so it fits into the terminal window horizontally.'
+        ),
     )
     argp.add_argument(
         '-v', '--invert', dest='invert', action='store_true',
@@ -439,10 +438,9 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         sys.exit(1)
     image = Image.open(options.inputfile).copy()
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
-    if options.fit_to_width or options.zoom_factor:
-        image = scale_image(image, options.zoom_factor)
     rows = rasterize(
         image,
+        zoom=scale_image(image, options.zoom_factor),
         inverted=options.invert,
         crop_y=options.crop_y,
         edging=options.sharpen,
