@@ -36,6 +36,19 @@ font-preview:
   bash "${tmpfile}"
 
 
+# take a screenshot && replace image file at screenshot.png
+take-screenshot: termshot
+  ./termshot -cf screenshot.png -- python p.py eppels.png -e.5 -yz2
+
+
+# install termshot
+termshot:
+  #!/usr/bin/env bash
+  curl -s --follow \
+    https://github.com/homeport/termshot/releases/download/v0.6.0/termshot_0.6.0_linux_amd64.tar.gz \
+    | tar -xvz termshot
+
+
 # run pytest
 [default]
 test pytest_args='':
