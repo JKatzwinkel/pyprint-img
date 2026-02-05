@@ -78,6 +78,15 @@ python p.py eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣾⣶⣶⣶⣶⣾⣿⣿⣿⣿⣿⣿
 ```
 
+enable dithering but invert color values:
+
+```bash
+python p.py eppels.png -e.5 -v
+```
+
+```output
+```
+
 scale input image by factor `2` first and raise threshold forgivingness by 1%:
 
 ```bash

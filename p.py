@@ -366,7 +366,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     argp.add_argument(
         '-v', '--invert', dest='invert', action='store_true',
-        help="use the input image's negative.",
+        help="invert 'pixel' values of output.",
     )
     argp.add_argument(
         '-a', '--sharpen', dest='sharpen', action='count', default=0,
