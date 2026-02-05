@@ -119,7 +119,7 @@ def thr_local_avg_factory(
         )
         return result
     blur_radius = blur_radius or max(
-        25, min(image.width, image.height) // 20
+        12, min(image.width, image.height) // 16
     )
     averaged = image.filter(
         ImageFilter.GaussianBlur(blur_radius)
