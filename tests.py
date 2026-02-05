@@ -6,7 +6,7 @@ from unittest import mock
 import tempfile
 import pytest
 
-from p import main, parse_args, scale_image, rasterize
+from p import main, parse_args, sample_func, scale_image, rasterize
 
 
 @pytest.mark.parametrize(
@@ -157,3 +157,10 @@ def test_fit_to_window(image: Image.Image) -> None:
     ]
     assert len(lines) == 11
     assert len(lines[0]) == 44
+
+
+def test_sampling() -> None:
+    im = Image.frombytes('L', (2, 2), b'\x00\x40\x80\xff')
+    sample = sample_func(im, .5, .5)
+    assert sample(0, 0) == 0
+    assert sample(2, 0) == 64

@@ -160,6 +160,17 @@ DITHER_ERROR_RECIPIENTS = {
 }
 
 
+def sample_func(
+    image: Image.Image, sx: float, sy: float,
+) -> Callable[[float, float], int]:
+    def sample(x: float, y: float) -> int:
+        pixel = x * sx, y * sy
+        pixelvalue = image.getpixel(pixel) or 0  # type: ignore[arg-type]
+        assert isinstance(pixelvalue, int), f'{pixelvalue}'
+        return pixelvalue
+    return sample
+
+
 def rasterize(
     image: Image.Image,
     zoom: float = 1,
@@ -176,12 +187,6 @@ def rasterize(
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
 ) -> Iterable[str]:
-
-    def sample(x: float, y: float) -> int:
-        pixel = x * sx, y * sy
-        pixelvalue = image.getpixel(pixel) or 0  # type: ignore[arg-type]
-        assert isinstance(pixelvalue, int), f'{pixelvalue}'
-        return pixelvalue
 
     error_recipients = DITHER_ERROR_RECIPIENTS[dither_method]
 
@@ -212,6 +217,7 @@ def rasterize(
     )
     max_col = int(min(image.width * zoom / cw, c))
     Debug.log(f'using {max_col} columns × {max_row} rows')
+    sample = sample_func(image, sx, sy)
     grid: list[list[float]] = [
         [sample(x, y) for x in range(max_col * 2)]
         for y in range(max_row * 4)
