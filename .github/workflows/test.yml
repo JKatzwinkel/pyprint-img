@@ -75,4 +75,13 @@ jobs:
           git commit -m ":memo: update usage instructions && examples"
           git push
 
+      - name: print env
+        run: env
+
+      - name: list supported fonts
+        run: fc-list ':charset=2800'
+
+      - name: ':memo: update screenshot'
+        run: just take-screenshot
+
 ...
