@@ -37,11 +37,15 @@ font-preview:
 
 
 # take a screenshot && replace image file at screenshot.png
-take-screenshot:
-  python p.py eppels.png -z2 -e.5 | \
-    magick -background indigo -fill white \
+take-screenshot cmd='python p.py eppels.png -z4 -e.5':
+  {{cmd}} | \
+    magick -background indigo -fill seashell3 -gravity south \
     -font /usr/share/fonts/Adwaita/AdwaitaMono-Bold.ttf \
-    -size 800x -pointsize 30 caption:@- screenshot.png
+    -size 1200x -pointsize 21 caption:@- screenshot.png
+  magick screenshot.png -pointsize 21 \
+    -font /usr/share/fonts/Adwaita/AdwaitaMono-Bold.ttf \
+    -fill chartreuse \
+    -annotate +41+25 '> {{cmd}}' screenshot.png
 
 
 # run pytest
