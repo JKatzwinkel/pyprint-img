@@ -41,8 +41,8 @@ take-screenshot cmd='python p.py eppels.png -z4 -e.5':
   #!/usr/bin/env bash
   FONT_PS=$(fc-list ':mono' file | grep -im1 'dejavu')
   echo "prompt font: ${FONT_PS%:*}"
-  FONT_OUT=$(fc-list ':charset=2800 :mono' file | head -n1)
-  FONT_OUT=${FONT_OUT:-$(fc-list :charset=2800 file | head -n1)}
+  FONT_OUT=$(fc-list ':charset=2800 :mono' file | grep -vim1 'freemono')
+  FONT_OUT=${FONT_OUT:-$(fc-list :charset=2800 file | grep -m1 'DejaVuSerif-Bold')}
   echo "stdout font: ${FONT_OUT%:*}"
   {{cmd}} | \
     magick -background indigo -fill seashell3 -gravity south \
