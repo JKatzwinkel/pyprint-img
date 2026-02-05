@@ -6,7 +6,14 @@ from unittest import mock
 import tempfile
 import pytest
 
-from p import main, parse_args, sample_func, scale_image, rasterize
+from p import (
+    DitherMethod,
+    main,
+    parse_args,
+    sample_func,
+    scale_image,
+    rasterize,
+)
 
 
 @pytest.mark.parametrize(
@@ -123,7 +130,7 @@ def image() -> Image.Image:
     )
 )
 def test_dither_method(
-    image: Image.Image, method: str, pattern: str, expected: bool,
+    image: Image.Image, method: DitherMethod, pattern: str, expected: bool,
 ) -> None:
     result = ['']
     for line in rasterize(

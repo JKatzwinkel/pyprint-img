@@ -150,6 +150,8 @@ def sharpen(
     return image
 
 
+type DitherMethod = Literal['atkinson', 'floyd-steinberg']
+
 DITHER_ERROR_RECIPIENTS = {
     'atkinson': [
         (1, 0, 2), (2, 0, 2), (-1, 1, 2), (0, 1, 2), (1, 1, 2), (0, 2, 2),
@@ -178,9 +180,7 @@ def rasterize(
     crop_y: bool = False,
     edging: int = 0,
     dither: float = 0,
-    dither_method: Literal[
-        'atkinson', 'floyd-steinberg',
-    ] = 'atkinson',
+    dither_method: DitherMethod = 'atkinson',
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
     rcwh_func: Callable[

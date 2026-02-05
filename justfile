@@ -47,4 +47,4 @@ lint flake8_args='':
 
 # run mypy
 type mypy_args='':
-  python -mmypy --strict {{mypy_args}} p.py
+  python -mmypy --strict {{mypy_args}} tests.py
