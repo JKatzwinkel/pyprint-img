@@ -38,14 +38,20 @@ font-preview:
 
 # take a screenshot && replace image file at screenshot.png
 take-screenshot cmd='python p.py eppels.png -z4 -e.5':
+  #!/usr/bin/env bash
+  FONT_PS=$(fc-list ':mono' file | grep -im1 'dejavu')
+  echo "prompt font: ${FONT_PS%:*}"
+  FONT_OUT=$(fc-list ':charset=2800 :mono' file | head -n1)
+  FONT_OUT=${FONT_OUT:-$(fc-list :charset=2800 file | head -n1)}
+  echo "stdout font: ${FONT_OUT%:*}"
   {{cmd}} | \
     magick -background indigo -fill seashell3 -gravity south \
-    -font /usr/share/fonts/Adwaita/AdwaitaMono-Bold.ttf \
-    -size 1200x -pointsize 21 caption:@- screenshot.png
+    -font "${FONT_OUT%:*}" -size 1200x -pointsize 17 caption:@- \
+    screenshot.png
   magick screenshot.png -pointsize 21 \
-    -font /usr/share/fonts/Adwaita/AdwaitaMono-Bold.ttf \
-    -fill chartreuse \
-    -annotate +41+25 '> {{cmd}}' screenshot.png
+    -font "${FONT_PS%:*}" -fill chartreuse \
+    -annotate +41+25 '> {{cmd}}' \
+    screenshot.png
 
 
 # run pytest

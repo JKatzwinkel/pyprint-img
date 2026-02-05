@@ -78,6 +78,9 @@ jobs:
       - name: print env
         run: env | sort
 
+      - name: list monospace fonts
+        run: fc-list :mono file spacing family
+
       - name: list supported fonts
         run: fc-list ':charset=2800' file spacing family
 
