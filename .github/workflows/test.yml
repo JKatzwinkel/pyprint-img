@@ -53,28 +53,6 @@ jobs:
       - name: re-generate cli output examples in readme file
         run: just update-manual
 
-      - name: see if something changed
-        id: changed
-        run: |
-          chg=$(git diff --shortstat | wc -l)
-          echo "changed=${chg}" >> ${GITHUB_OUTPUT}
-
-      - name: show changes
-        if: steps.changed.outputs.changed != '0'
-        run: git diff
-
-      - name: commit changes
-        if: steps.changed.outputs.changed != '0'
-        env:
-          GIT_MAIL: >-
-            41898282+github-actions[bot]@users.noreply.github.com
-        run: |
-          git config user.email "${GIT_MAIL}"
-          git config user.name "github-actions[bot]"
-          git add readme.md
-          git commit -m ":memo: update usage instructions && examples"
-          git push
-
       - name: print env
         run: env | sort
 
@@ -97,5 +75,27 @@ jobs:
         uses: actions/upload-artifact@v6.0.0
         with:
           path: screenshot.png
+
+      - name: see if something changed
+        id: changed
+        run: |
+          chg=$(git diff --shortstat | wc -l)
+          echo "changed=${chg}" >> ${GITHUB_OUTPUT}
+
+      - name: show changes
+        if: steps.changed.outputs.changed != '0'
+        run: git diff
+
+      - name: commit changes
+        if: steps.changed.outputs.changed != '0'
+        env:
+          GIT_MAIL: >-
+            41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          git config user.email "${GIT_MAIL}"
+          git config user.name "github-actions[bot]"
+          git add readme.md screenshot.png
+          git commit -m ":memo: update usage instructions && examples"
+          git push
 
 ...
