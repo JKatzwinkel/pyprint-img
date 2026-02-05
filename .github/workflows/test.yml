@@ -88,11 +88,7 @@ jobs:
         run: fc-list ':charset=2800 :mono' file
 
       - name: install imagemagick
-        run: |
-          sudo apt-get update
-          apt-cache search imagemagick
-          apt policy imagemagick
-          sudo apt-get install -y imagemagick
+        uses: mfinelli/setup-imagemagick@v7.0.1
 
       - name: ':memo: update screenshot'
         run: just take-screenshot
