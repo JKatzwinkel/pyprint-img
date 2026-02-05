@@ -76,10 +76,13 @@ jobs:
           git push
 
       - name: print env
-        run: env
+        run: env | sort
 
       - name: list supported fonts
-        run: fc-list ':charset=2800'
+        run: fc-list ':charset=2800' file spacing family
+
+      - name: list supported monospace fonts
+        run: fc-list ':charset=2800 :mono' file
 
       - name: ':memo: update screenshot'
         run: just take-screenshot
