@@ -87,6 +87,13 @@ jobs:
       - name: list supported monospace fonts
         run: fc-list ':charset=2800 :mono' file
 
+      - name: install imagemagick
+        run: |
+          sudo apt-get update
+          apt-cache search imagemagick
+          apt policy imagemagick
+          sudo apt-get install -y imagemagick
+
       - name: ':memo: update screenshot'
         run: just take-screenshot
 
