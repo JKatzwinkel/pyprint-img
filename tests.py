@@ -108,15 +108,9 @@ def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
         assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def image() -> Image.Image:
-    return (image := Image.open('eppels.png')).resize(
-        (
-            int(image.width * 1.6),
-            int(image.height * 1.6)
-        ),
-        resample=Image.Resampling.LANCZOS,
-    )
+    return Image.open('eppels.png')
 
 
 @pytest.mark.parametrize(
@@ -124,8 +118,9 @@ def image() -> Image.Image:
         ('atkinson', '⠳', True),
         ('atkinson', '⢕', False),
         ('atkinson', '⡪⡪', False),
+        ('atkinson', '⢕⢕', False),
         ('atkinson', '⣺⡺', False),
-        ('floyd-steinberg', '⡪⡪', True),
+        ('floyd-steinberg', '⢕⢕', True),
         ('floyd-steinberg', '⣺⡺', True),
     )
 )
@@ -134,7 +129,7 @@ def test_dither_method(
 ) -> None:
     result = ['']
     for line in rasterize(
-        image, dither_method=method, dither=.7,
+        image, dither_method=method, dither=.7, zoom=2,
         rcwh_func=lambda: (44, 174, 1914, 1012),
     ):
         result.append(line)
