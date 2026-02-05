@@ -8,6 +8,7 @@
       "installOhMyZshConfig": true
     }
   },
+  "postStartCommand": "sudo apt-get update && sudo apt-get install -y just",
   "customizations": {
     "vscode": {
       "extensions": [
