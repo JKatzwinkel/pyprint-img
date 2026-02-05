@@ -37,8 +37,11 @@ def terminal_rcwh() -> tuple[int, int, int, int]:
         return r, c, w, h
     except Exception as e:
         Debug.log(f'could not determine terminal dimensions: {e}')
-    if r * c > 0:
-        return (r, c, c * 9, r * 19)
+    try:
+        if r * c > 0:
+            return (r, c, c * 9, r * 19)
+    except UnboundLocalError:
+        ...
     return (44, 174, 1723, 911)
 
 
