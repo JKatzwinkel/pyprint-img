@@ -93,4 +93,9 @@ jobs:
       - name: ':memo: update screenshot'
         run: just take-screenshot
 
+      - name: upload screenshot as github artifact
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          path: screenshot.png
+
 ...
