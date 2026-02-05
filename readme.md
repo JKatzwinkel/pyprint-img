@@ -1,5 +1,7 @@
 # print images to terminal
 
+![](./screenshot.png)
+
 ```help
 usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-d] [-y] [-z FACTOR | -x] [-v] [-a]
             [-b LEVEL] [-e FACTOR] [-D METH | --floyd] [-t NUM]
