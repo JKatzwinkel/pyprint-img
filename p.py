@@ -164,12 +164,37 @@ DITHER_ERROR_RECIPIENTS = {
 
 def sample_func(
     image: Image.Image, sx: float, sy: float,
-) -> Callable[[float, float], int]:
-    def sample(x: float, y: float) -> int:
-        pixel = x * sx, y * sy
-        pixelvalue = image.getpixel(pixel) or 0  # type: ignore[arg-type]
+) -> Callable[[int, int], int]:
+
+    def getpixel(px: int, py: int) -> int:
+        pixelvalue = image.getpixel((px, py)) or 0
         assert isinstance(pixelvalue, int), f'{pixelvalue}'
         return pixelvalue
+
+    def getvalues(px: float, py: float) -> tuple[int, int, int, int]:
+        x1, y1 = int(px), int(py)
+        V = [getpixel(x1, y1)] * 4
+        if x1 + 1 < image.width:
+            V[1] = getpixel(x1 + 1, y1)
+            if y1 + 1 < image.height:
+                V[3] = getpixel(x1 + 1, y1 + 1)
+        if y1 + 1 < image.height:
+            V[2] = getpixel(x1, y1 + 1)
+        return (
+            V[0], V[1],
+            V[2], V[3],
+        )
+
+    def sample(x: int, y: int) -> int:
+        px, py = sx * x, sy * y
+        v1, v2, v3, v4 = getvalues(px, py)
+        dx = px - int(px)
+        wx1 = v1 + (v2 - v1) * dx
+        wx2 = v3 + (v4 - v3) * dx
+        dy = py - int(py)
+        result = wx1 + (wx2 - wx1) * dy
+        return round(result)
+
     return sample
 
 
