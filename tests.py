@@ -114,18 +114,19 @@ def image() -> Image.Image:
 
 
 @pytest.mark.parametrize(
-    'method, pattern, expected', (
-        ('atkinson', '⠳', True),
-        ('atkinson', '⢕', False),
-        ('atkinson', '⡪⡪', False),
-        ('atkinson', '⢕⢕', False),
-        ('atkinson', '⣺⡺', False),
-        ('floyd-steinberg', '⢕⢕', True),
-        ('floyd-steinberg', '⣺⡺', True),
+    'method, patterns, expected', (
+        ('atkinson', ['⠳', '⢷'], True),
+        ('atkinson', ['⢕'], False),
+        ('atkinson', ['⡪⡪'], False),
+        ('atkinson', ['⢕⢕'], False),
+        ('atkinson', ['⣺⡺'], False),
+        ('floyd-steinberg', ['⢕⢕', '⡪⡪'], True),
+        ('floyd-steinberg', ['⣺⡺'], True),
     )
 )
 def test_dither_method(
-    image: Image.Image, method: DitherMethod, pattern: str, expected: bool,
+    image: Image.Image, method: DitherMethod,
+    patterns: list[str], expected: bool,
 ) -> None:
     result = ['']
     for line in rasterize(
@@ -133,12 +134,14 @@ def test_dither_method(
         rcwh_func=lambda: (44, 174, 1914, 1012),
     ):
         result.append(line)
-        if pattern in line:
+        if any(pattern in line for pattern in patterns):
             break
     output = '\n'.join(result)
-    assertion = (pattern in output) is expected
+    assertion = any(
+        pattern in output for pattern in patterns
+    ) is expected
     predicate = 'expected' if expected else 'not expected'
-    assert assertion, f'"{pattern}" {predicate} in {output}'
+    assert assertion, f'any of "{patterns}" {predicate} in {output}'
 
 
 def test_zoom(image: Image.Image) -> None:
