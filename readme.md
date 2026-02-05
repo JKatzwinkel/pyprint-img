@@ -21,7 +21,7 @@ options:
   -d, --debug           preceed normal output with debug log printed to
                         /dev/stderr.
   -y, --crop-y          crop image to terminal height.
-  -v, --invert          use the input image's negative.
+  -v, --invert          invert 'pixel' values of output.
   -a, --sharpen         enhance input image by emphasizing edges a little (the
                         more often the option gets repeated, the more).
   -b, --brightness LEVEL
@@ -85,6 +85,13 @@ python p.py eppels.png -e.5 -v
 ```
 
 ```output
+⠡⠌⠡⠉⠉⠉⢉⣩⣉⣉⡀⠀⠀⠈⠉⠉⠉⠉⠉⠉
+⠡⠈⠄⠁⠀⢠⣿⠳⡛⠟⡹⡄⠀⠀⠂⢁⠈⡐⢀⠂
+⠡⠈⠄⣤⣦⣼⣿⣻⣍⣶⡹⣡⠤⠤⣄⡀⠐⡀⠂⠌
+⠡⢈⠘⠿⠿⣿⣷⣿⠿⢃⣿⣧⣘⡹⠻⠩⠱⡀⠡⢈
+⡁⠂⠄⡀⠀⠀⣤⣶⣿⣿⣿⣿⣷⣷⣳⡴⣹⠄⢁⠂
+⠄⡁⢂⠐⡀⠈⠜⡿⣿⣿⣿⣿⣿⣿⠿⠟⠃⢀⠂⠌
+⢂⠁⣂⠐⠠⠀⠀⠀⠁⠉⠉⠉⠉⠀⢀⠠⠐⠠⢈⠐
 ```
 
 scale input image by factor `2` first and raise threshold forgivingness by 1%:
