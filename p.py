@@ -27,12 +27,14 @@ class Debug:
 
 def terminal_rcwh() -> tuple[int, int, int, int]:
     try:
-        return struct.unpack(
+        r, c, w, h = struct.unpack(
             'HHHH', fcntl.ioctl(
                 0, termios.TIOCGWINSZ,
                 struct.pack('HHHH', 0, 0, 0, 0)
             )
         )
+        assert w * h > 0, f'invalid dimensions: {w}×{h} ({c}cols{r}rows)'
+        return r, c, w, h
     except Exception as e:
         Debug.log(f'could not determine terminal dimensions: {e}')
     return (44, 174, 1723, 911)
