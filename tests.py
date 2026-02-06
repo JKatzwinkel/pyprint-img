@@ -1,4 +1,5 @@
 import pathlib
+from typing import Iterable
 
 from PIL import Image
 
@@ -94,18 +95,27 @@ def test_cli_debug_output(capsys: pytest.CaptureFixture[str]) -> None:
     assert 'window dimensions:' in stderr
 
 
+@pytest.fixture
+def tmpfile() -> Iterable[pathlib.Path]:
+    with tempfile.TemporaryDirectory() as tmp:
+        outfile = pathlib.Path(tmp) / 'fya.txt'
+        yield outfile
+        outfile.unlink()
+
+
 @mock.patch(
     'p.terminal_rcwh',
     side_effect=lambda: (44, 174, 1914, 1012),
 )
-def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        outfile = pathlib.Path(tmp) / 'fya.txt'
-        main(f'eppels.png -o {outfile}'.split())
-        assert outfile.exists()
-        with pytest.raises(SystemExit):
-            main(f'irrelevant.jpg -o {outfile}'.split())
-        assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
+def test_cli_creates_file(
+    _terminal_rcwh_mock: mock.MagicMock, tmpfile: pathlib.Path,
+) -> None:
+    outfile = tmpfile
+    main(f'eppels.png -o {outfile}'.split())
+    assert outfile.exists()
+    with pytest.raises(SystemExit):
+        main(f'irrelevant.jpg -o {outfile}'.split())
+    assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
 
 
 @mock.patch(
