@@ -82,7 +82,7 @@ python p.py eppels.png
 
 read from stdin by passing `-` as the file argument:
 
-```bash
+```shell
 cat eppels.png | python p.py -
 ```
 
@@ -98,15 +98,10 @@ cat eppels.png | python p.py -
 
 this is useful for integrating with other command-line tools:
 
-```bash
+```shell
 curl -s https://example.com/image.png | python p.py -
 ```
 
-stdin input works with all options:
-
-```bash
-cat eppels.png | python p.py - -z 2 -e .5
-```
 
 enable dithering but invert color values:
 
