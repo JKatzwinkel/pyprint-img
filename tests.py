@@ -200,7 +200,7 @@ def test_both_stdin_and_file_arg_error() -> None:
             assert exc_info.value.code == 1
     finally:
         # Clean up
-        pathlib.Path(tmp_path).unlink()
+        pathlib.Path(tmp_path).unlink(missing_ok=True)
 
 
 @pytest.fixture(scope='session')

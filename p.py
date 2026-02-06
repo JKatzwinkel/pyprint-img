@@ -517,8 +517,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 def stdin_has_data() -> bool:
     """Check if stdin has data available without blocking."""
     try:
-        return bool(select.select([sys.stdin], [], [], 0.0)[0])
-    except (OSError, io.UnsupportedOperation):
+        return bool(select.select([sys.stdin.fileno()], [], [], 0.0)[0])
+    except (OSError, io.UnsupportedOperation, ValueError):
         # stdin doesn't support fileno() (e.g., during testing or redirection)
         return False
 
