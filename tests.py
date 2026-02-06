@@ -120,6 +120,19 @@ def test_cli_creates_file(
     assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
 
 
+@mock.patch(
+    'p.os.environ.get',
+    side_effect=lambda k: '44x174x1723x911',
+)
+def test_overwrite_terminal_size_via_env_var(
+    _os_environ_get_mock: mock.MagicMock,
+    tmpfile: pathlib.Path,
+) -> None:
+    main(f'eppels.png -o {tmpfile} -xyd'.split())
+    output = tmpfile.read_text().split('\n')
+    assert len(output[0]) == 173
+
+
 def test_stdin_input(
     capsys: pytest.CaptureFixture[str],
     tmpfile: pathlib.Path,

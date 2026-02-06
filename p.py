@@ -1,6 +1,7 @@
 import argparse
 import fcntl
 import io
+import os
 import pathlib
 import struct
 import sys
@@ -65,13 +66,17 @@ def _terminal_rcwh(dev: TextIO) -> tuple[int, int, int, int]:
 
 def terminal_rcwh(
     stdin: TextIO = sys.stdin, stdout: TextIO = sys.stdout,
+    fallback_values: tuple[int, int, int, int] = (53, 53,  477, 1007),
 ) -> tuple[int, int, int, int]:
+    if (TERM_RCWH := os.environ.get('TERM_RCWH')):
+        r, c, w, h = list(map(int, TERM_RCWH.split('x')))
+        return (r, c, w, h)
     for dev in (stdout, stdin):
         try:
             return _terminal_rcwh(dev)
         except Exception as e:
             Debug.log(f'getting terminal size failed for device {dev}: {e}')
-    return (53, 53,  477, 1007)
+    return fallback_values
 
 
 def char_name(matrix: list[bool], inverted: bool = False) -> str:
