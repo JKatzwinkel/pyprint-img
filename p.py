@@ -363,8 +363,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         parents=[argp_thr, argp_out],
     )
     argp.add_argument(
-        'inputfile', type=pathlib.Path, metavar='FILE',
-        help='path to input image file.',
+        'inputfile', type=str, metavar='FILE',
+        help='path to input image file, or "-" to read from stdin.',
     )
     argp.add_argument(
         '-f', '--force', dest='output_overwrite', action='store_true',
@@ -476,7 +476,10 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
             file=sys.stderr
         )
         sys.exit(1)
-    image = Image.open(options.inputfile).copy()
+    if options.inputfile == '-':
+        image = Image.open(sys.stdin.buffer).copy()
+    else:
+        image = Image.open(pathlib.Path(options.inputfile)).copy()
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
     rows = list(rasterize(
         image,

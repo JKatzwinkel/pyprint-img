@@ -108,6 +108,29 @@ def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
         assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
 
 
+@mock.patch(
+    'p.terminal_rcwh',
+    side_effect=lambda: (44, 174, 1914, 1012),
+)
+def test_stdin_input(terminal_rcwh_mock: mock.MagicMock) -> None:
+    import io
+    with tempfile.TemporaryDirectory() as tmp:
+        outfile = pathlib.Path(tmp) / 'output.txt'
+        # Read image file into buffer
+        with open('eppels.png', 'rb') as f:
+            image_data = f.read()
+        # Mock stdin.buffer at the point it's accessed
+        mock_stdin = mock.Mock()
+        mock_stdin.buffer = io.BytesIO(image_data)
+        with mock.patch('p.sys.stdin', mock_stdin):
+            main(f'- -o {outfile}'.split())
+        assert outfile.exists()
+        with outfile.open('r') as f:
+            output = f.read()
+            # Verify output contains braille characters
+            assert '⣶' in output or '⣿' in output or '⠀' in output
+
+
 @pytest.fixture(scope='session')
 def image() -> Image.Image:
     return Image.open('eppels.png')
