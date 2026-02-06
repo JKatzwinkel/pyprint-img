@@ -112,7 +112,7 @@ def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
     'p.terminal_rcwh',
     side_effect=lambda: (44, 174, 1914, 1012),
 )
-def test_stdin_input(terminal_rcwh_mock: mock.MagicMock) -> None:
+def test_stdin_input(_terminal_rcwh_mock: mock.MagicMock) -> None:
     import io
     with tempfile.TemporaryDirectory() as tmp:
         outfile = pathlib.Path(tmp) / 'output.txt'
@@ -123,7 +123,8 @@ def test_stdin_input(terminal_rcwh_mock: mock.MagicMock) -> None:
         mock_stdin = mock.Mock()
         mock_stdin.buffer = io.BytesIO(image_data)
         with mock.patch('p.sys.stdin', mock_stdin):
-            main(f'- -o {outfile}'.split())
+            result = main(f'- -o {outfile}'.split())
+        assert result == 0
         assert outfile.exists()
         with outfile.open('r') as f:
             output = f.read()
