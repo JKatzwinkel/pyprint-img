@@ -7,7 +7,7 @@ import sys
 import termios
 import textwrap
 import unicodedata
-from typing import Any, Callable, Iterable, Literal, Self
+from typing import Any, Callable, Iterable, Literal, Self, TextIO
 
 from PIL import Image, ImageChops, ImageFilter
 
@@ -25,24 +25,53 @@ class Debug:
         print('\n'.join(cls.msgs), file=out)
 
 
-def terminal_rcwh() -> tuple[int, int, int, int]:
-    try:
-        r, c, w, h = struct.unpack(
-            'HHHH', fcntl.ioctl(
-                0, termios.TIOCGWINSZ,
-                struct.pack('HHHH', 0, 0, 0, 0)
-            )
+def get_ioctl_windowsize(dev: TextIO) -> tuple[int, int, int, int]:
+    fd = dev.fileno()
+    return struct.unpack(
+        'HHHH', fcntl.ioctl(
+            fd, termios.TIOCGWINSZ,
+            struct.pack('HHHH', 0, 0, 0, 0)
         )
+    )
+
+
+def _terminal_rcwh(dev: TextIO) -> tuple[int, int, int, int]:
+    try:
+        r, c, w, h = get_ioctl_windowsize(dev)
         assert w * h > 0, f'invalid dimensions: {w}×{h} ({c}cols{r}rows)'
+        Debug.log(
+            f'terminal size determined via ioctl for device {dev}'
+        ).log(
+            f'terminal size: {c}×{r} columns×rows'
+        ).log(
+            f'window size: {w}×{h} px'
+        )
         return r, c, w, h
     except Exception as e:
         Debug.log(f'could not determine terminal dimensions: {e}')
-    try:
-        if r * c > 0:
-            return (r, c, c * 9, r * 19)
-    except UnboundLocalError:
-        ...
-    return (44, 174, 1723, 911)
+    if 'r' not in locals() or r * c == 0:
+        r, c = termios.tcgetwinsize(dev)
+    if r * c > 0:
+        Debug.log(
+            'terminal size determined using termios.tcgetwinsize '
+            f'for device {dev}'
+        ).log(
+            f'terminal size: {c}×{r} columns×rows'
+        ).log(
+            'window size made up based on terminal size'
+        )
+    return (r, c, c * 9, r * 19)
+
+
+def terminal_rcwh(
+    stdin: TextIO = sys.stdin, stdout: TextIO = sys.stdout,
+) -> tuple[int, int, int, int]:
+    for dev in (stdout, stdin):
+        try:
+            return _terminal_rcwh(dev)
+        except Exception as e:
+            Debug.log(f'getting terminal size failed for device {dev}: {e}')
+    return (53, 53,  477, 1007)
 
 
 def char_name(matrix: list[bool], inverted: bool = False) -> str:

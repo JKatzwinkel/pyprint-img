@@ -1,6 +1,6 @@
 import pathlib
 import sys
-from typing import Iterable
+from typing import Iterable, TextIO
 
 from PIL import Image
 
@@ -15,6 +15,7 @@ from p import (
     sample_func,
     scale_image,
     rasterize,
+    terminal_rcwh,
 )
 
 
@@ -119,12 +120,7 @@ def test_cli_creates_file(
     assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
 
 
-@mock.patch(
-    'p.terminal_rcwh',
-    side_effect=lambda: (44, 174, 1914, 1012),
-)
 def test_stdin_input(
-    _terminal_rcwh_mock: mock.MagicMock,
     capsys: pytest.CaptureFixture[str],
     tmpfile: pathlib.Path,
 ) -> None:
@@ -134,6 +130,37 @@ def test_stdin_input(
     capture = capsys.readouterr()
     assert 'image dimensions' in capture.err
     assert '⣿' in tmpfile.read_text()
+
+
+@mock.patch('p.sys.stdout.fileno', side_effect=lambda: 1)
+@mock.patch('p.get_ioctl_windowsize')
+def test_stdin_input_fit_width(
+    get_ioctl_windowsize_mock: mock.MagicMock,
+    _sys_stdout_fileno_mock: mock.MagicMock,
+    tmpfile: pathlib.Path,
+) -> None:
+    def _get_ioctl_windowsize(dev: TextIO) -> tuple[int, int, int, int]:
+        if dev.fileno() == 1:
+            return (39, 40, 360, 741)
+        raise OSError('[Errno 25] Inappropriate ioctl for device 🤡')
+
+    get_ioctl_windowsize_mock.side_effect = _get_ioctl_windowsize
+    with pathlib.Path('eppels.png').open() as stdin:
+        sys.stdin = stdin
+        main(f'- -d -o {tmpfile} -xy'.split())
+    assert len(tmpfile.read_text().split('\n')[0]) == 40
+
+
+def test_stdin_input_inappropriate_ioctl_for_device(
+    tmpfile: pathlib.Path,
+) -> None:
+    with (
+        pathlib.Path('eppels.png').open() as stdin,
+        tmpfile.open('w+') as stdout
+    ):
+        sys.stdin = stdin
+        sys.stdout = stdout
+        assert terminal_rcwh(sys.stdin, sys.stdout)
 
 
 @pytest.fixture(scope='session')
