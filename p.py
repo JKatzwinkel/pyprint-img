@@ -3,6 +3,7 @@ import fcntl
 import io
 import os
 import pathlib
+import select
 import struct
 import sys
 import termios
@@ -513,6 +514,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return argp.parse_args(args=argv)
 
 
+def stdin_has_data() -> bool:
+    """Check if stdin has data available without blocking."""
+    try:
+        return bool(select.select([sys.stdin], [], [], 0.0)[0])
+    except (OSError, io.UnsupportedOperation):
+        # stdin doesn't support fileno() (e.g., during testing or redirection)
+        return False
+
+
 def main(argv: list[str] = sys.argv[1:]) -> int:
     options = parse_args(argv)
     if not options.output_overwrite and options.outputfile.exists():
@@ -522,6 +532,17 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
             file=sys.stderr
         )
         sys.exit(1)
+
+    # Check if both stdin and file argument are provided
+    has_stdin = stdin_has_data()
+    if has_stdin and options.inputfile != '-':
+        print(
+            'error: both stdin and file argument provided. '
+            'Please specify either a file path or use "-" to read from stdin.',
+            file=sys.stderr
+        )
+        sys.exit(1)
+
     if options.inputfile == '-':
         image = Image.open(sys.stdin.buffer).copy()
     else:
