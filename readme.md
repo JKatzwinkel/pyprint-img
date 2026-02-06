@@ -10,7 +10,7 @@ usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-d] [-y] [-z FACTOR | -x] [-v] [-a]
 rasterize an image into the terminal.
 
 positional arguments:
-  FILE                  path to input image file.
+  FILE                  path to input image file, or "-" to read from stdin.
 
 options:
   -h, --help            show this help message and exit
