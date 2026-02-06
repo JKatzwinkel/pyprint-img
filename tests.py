@@ -184,6 +184,25 @@ def test_stdin_input_inappropriate_ioctl_for_device(
         assert terminal_rcwh(sys.stdin, sys.stdout)
 
 
+def test_both_stdin_and_file_arg_error() -> None:
+    """Test that providing both stdin and file argument produces an error."""
+    with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
+        # Copy eppels.png to a temp file to use as stdin
+        with pathlib.Path('eppels.png').open('rb') as f:
+            tmp.write(f.read())
+        tmp_path = tmp.name
+
+    try:
+        # Mock stdin_has_data to return True
+        with mock.patch('p.stdin_has_data', return_value=True):
+            with pytest.raises(SystemExit) as exc_info:
+                main(['shelly.jpg', '-o', '/tmp/test_output.txt'])
+            assert exc_info.value.code == 1
+    finally:
+        # Clean up
+        pathlib.Path(tmp_path).unlink(missing_ok=True)
+
+
 @pytest.fixture(scope='session')
 def image() -> Image.Image:
     return Image.open('eppels.png')
