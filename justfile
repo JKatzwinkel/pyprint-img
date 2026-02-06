@@ -1,8 +1,10 @@
+# alias for `:test`
 default: test
+
 
 [doc("update usage instructions code block in readme.md \
 with the output of running cli --help again")]
-update-manual:
+update-manual $TERM_RCWH='44x174x1723x911':
   #!/usr/bin/env bash
   set -euo pipefail
   sed -i -ne '/```help/ {p; r'<(python p.py -h) \
@@ -37,7 +39,7 @@ font-preview:
 
 
 # take a screenshot && replace image file at screenshot.png
-take-screenshot cmd='python p.py eppels.png -z4 -e.5':
+take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174x1723x911':
   #!/usr/bin/env bash
   FONT_PS=$(fc-list ':mono' file | grep -im1 'dejavu')
   echo "prompt font: ${FONT_PS%:*}"
