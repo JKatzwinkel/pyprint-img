@@ -120,17 +120,25 @@ def test_cli_creates_file(
     assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
 
 
+@pytest.mark.parametrize(
+    'rcwh_var, expected_width', (
+        ('44x174x1723x911', 173),
+        ('20x44', 44),
+    )
+)
 @mock.patch(
     'p.os.environ.get',
     side_effect=lambda k: '44x174x1723x911',
 )
 def test_overwrite_terminal_size_via_env_var(
-    _os_environ_get_mock: mock.MagicMock,
+    os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
+    rcwh_var: str, expected_width: int,
 ) -> None:
+    os_environ_get_mock.side_effect = lambda k: rcwh_var
     main(f'eppels.png -o {tmpfile} -xyd'.split())
     output = tmpfile.read_text().split('\n')
-    assert len(output[0]) == 173
+    assert len(output[0]) == expected_width
 
 
 def test_stdin_input(

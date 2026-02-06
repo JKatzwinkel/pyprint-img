@@ -69,7 +69,19 @@ def terminal_rcwh(
     fallback_values: tuple[int, int, int, int] = (53, 53,  477, 1007),
 ) -> tuple[int, int, int, int]:
     if (TERM_RCWH := os.environ.get('TERM_RCWH')):
-        r, c, w, h = list(map(int, TERM_RCWH.split('x')))
+        values = TERM_RCWH.split('x')
+        Debug.log(
+            f'got fixed term size from TERM_RCWH env var: {"×".join(values)}'
+        )
+        if len(values) == 4:
+            r, c, w, h = list(map(int, values))
+        elif len(values) == 2:
+            r, c = list(map(int, values))
+            w, h = c * 9, r * 19
+        else:
+            msg = f'wrong number of values in TERM_RCWH: {values}'
+            Debug.log(msg)
+            raise ValueError(msg)
         return (r, c, w, h)
     for dev in (stdout, stdin):
         try:
