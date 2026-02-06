@@ -2,6 +2,11 @@
 
 ![](./screenshot.png)
 
+converts image files into monochrome unicode text utilizing the braille charset.
+
+
+## usage
+
 ```help
 usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-d] [-y] [-z FACTOR | -x] [-v] [-a]
             [-b LEVEL] [-e FACTOR] [-D METH | --floyd] [-t NUM]
@@ -47,8 +52,6 @@ dithering options:
   --floyd               shortcut for -Dfloyd-steinberg
 ```
 
-
-## usage
 
 a font supporting the braille charset at codepoints `U+2800` through `U+28ff` is
 required. here are some examples of fonts with braille glyphs and what they look

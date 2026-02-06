@@ -49,10 +49,12 @@ take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174x1723x91
   {{cmd}} | \
     magick -background indigo -fill seashell3 -gravity south \
     -font "${FONT_OUT%:*}" -size 1200x -pointsize 17 caption:@- \
+    -define png:exclude-chunks=date,time \
     screenshot.png
   magick screenshot.png -pointsize 21 \
     -font "${FONT_PS%:*}" -fill chartreuse \
     -annotate +41+25 '> {{cmd}}' \
+    -define png:exclude-chunks=date,time \
     screenshot.png
 
 
