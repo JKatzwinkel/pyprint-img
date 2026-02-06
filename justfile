@@ -1,5 +1,5 @@
-# alias for `:test`
-default: test
+# alias for `test`, `type`, && `lint` recipes
+default: test type lint
 
 
 [doc("update usage instructions code block in readme.md \

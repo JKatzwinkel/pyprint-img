@@ -122,7 +122,7 @@ def test_cli_creates_file(
 
 @pytest.mark.parametrize(
     'rcwh_var, expected_width', (
-        ('44x174x1723x911', 173),
+        ('44x174x1723x911', 173),  # XXX weird
         ('20x44', 44),
     )
 )
