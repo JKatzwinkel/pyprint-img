@@ -1,4 +1,5 @@
 import pathlib
+import sys
 from typing import Iterable
 
 from PIL import Image
@@ -122,24 +123,17 @@ def test_cli_creates_file(
     'p.terminal_rcwh',
     side_effect=lambda: (44, 174, 1914, 1012),
 )
-def test_stdin_input(_terminal_rcwh_mock: mock.MagicMock) -> None:
-    import io
-    with tempfile.TemporaryDirectory() as tmp:
-        outfile = pathlib.Path(tmp) / 'output.txt'
-        # Read image file into buffer
-        with open('eppels.png', 'rb') as f:
-            image_data = f.read()
-        # Mock stdin.buffer at the point it's accessed
-        mock_stdin = mock.Mock()
-        mock_stdin.buffer = io.BytesIO(image_data)
-        with mock.patch('p.sys.stdin', mock_stdin):
-            result = main(f'- -o {outfile}'.split())
-        assert result == 0
-        assert outfile.exists()
-        with outfile.open('r') as f:
-            output = f.read()
-            # Verify output contains braille characters
-            assert '⣶' in output or '⣿' in output or '⠀' in output
+def test_stdin_input(
+    _terminal_rcwh_mock: mock.MagicMock,
+    capsys: pytest.CaptureFixture[str],
+    tmpfile: pathlib.Path,
+) -> None:
+    with pathlib.Path('eppels.png').open() as f:
+        sys.stdin = f
+        main(f'- -d -o {tmpfile}'.split())
+    capture = capsys.readouterr()
+    assert 'image dimensions' in capture.err
+    assert '⣿' in tmpfile.read_text()
 
 
 @pytest.fixture(scope='session')
