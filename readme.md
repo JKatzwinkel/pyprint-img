@@ -10,7 +10,7 @@ usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-d] [-y] [-z FACTOR | -x] [-v] [-a]
 rasterize an image into the terminal.
 
 positional arguments:
-  FILE                  path to input image file.
+  FILE                  path to input image file, or "-" to read from stdin.
 
 options:
   -h, --help            show this help message and exit
@@ -79,6 +79,29 @@ python p.py eppels.png
 ⣺⣾⣿⣿⣿⣿⣦⣀⠀⠀⠀⠙⠂⠀⣀⣠⣴⣿⣿⣻
 ⣾⣿⠿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣶⣿⣿⣿⣿⣿⢻⣽
 ```
+
+read from stdin by passing `-` as the file argument:
+
+```shell
+cat eppels.png | python p.py -
+```
+
+```output
+⢶⣷⣶⣶⣶⣶⣶⡶⠶⠶⠶⢶⣿⣿⣶⣶⣶⣶⣶⣶⣶⣶
+⢺⣿⣿⣿⣿⣿⠋⠀⣁⣀⣀⡄⢻⣿⣿⣿⣿⣿⣿⣿⡿⢿
+⣽⣿⣿⣿⠿⠿⠀⡀⣻⣿⠿⠃⡸⠿⠿⠿⣿⣿⣿⣿⣿⣷
+⣿⣿⣏⠀⠀⠀⠈⠛⠄⠀⣠⠁⢰⣿⣗⡀⢀⢩⠻⣿⣿⣿
+⣻⣿⣿⣿⣾⣶⣶⡶⠒⠛⠃⠀⠀⠙⠛⠿⣿⠿⠀⣿⣿⣿
+⣺⣻⣿⣿⣿⣿⣧⡀⠀⠀⠀⠈⠲⡀⠀⠀⠀⠀⣰⣿⣿⣿
+⣺⣿⣿⣿⣿⣿⣿⣮⣦⣄⣀⣀⣀⣀⣠⣴⣶⣿⣿⣿⣿⣶
+```
+
+this is useful for integrating with other command-line tools:
+
+```shell
+curl -s https://example.com/image.png | python p.py -
+```
+
 
 enable dithering but invert color values:
 

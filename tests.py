@@ -1,4 +1,6 @@
 import pathlib
+import sys
+from typing import Iterable, TextIO
 
 from PIL import Image
 
@@ -13,6 +15,7 @@ from p import (
     sample_func,
     scale_image,
     rasterize,
+    terminal_rcwh,
 )
 
 
@@ -94,18 +97,83 @@ def test_cli_debug_output(capsys: pytest.CaptureFixture[str]) -> None:
     assert 'window dimensions:' in stderr
 
 
+@pytest.fixture
+def tmpfile() -> Iterable[pathlib.Path]:
+    with tempfile.TemporaryDirectory() as tmp:
+        outfile = pathlib.Path(tmp) / 'fya.txt'
+        yield outfile
+        outfile.unlink()
+
+
 @mock.patch(
     'p.terminal_rcwh',
     side_effect=lambda: (44, 174, 1914, 1012),
 )
-def test_cli_creates_file(terminal_rcwh_mock: mock.MagicMock) -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        outfile = pathlib.Path(tmp) / 'fya.txt'
-        main(f'eppels.png -o {outfile}'.split())
-        assert outfile.exists()
-        with pytest.raises(SystemExit):
-            main(f'irrelevant.jpg -o {outfile}'.split())
-        assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
+def test_cli_creates_file(
+    _terminal_rcwh_mock: mock.MagicMock, tmpfile: pathlib.Path,
+) -> None:
+    outfile = tmpfile
+    main(f'eppels.png -o {outfile}'.split())
+    assert outfile.exists()
+    with pytest.raises(SystemExit):
+        main(f'irrelevant.jpg -o {outfile}'.split())
+    assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
+
+
+@mock.patch(
+    'p.os.environ.get',
+    side_effect=lambda k: '44x174x1723x911',
+)
+def test_overwrite_terminal_size_via_env_var(
+    _os_environ_get_mock: mock.MagicMock,
+    tmpfile: pathlib.Path,
+) -> None:
+    main(f'eppels.png -o {tmpfile} -xyd'.split())
+    output = tmpfile.read_text().split('\n')
+    assert len(output[0]) == 173
+
+
+def test_stdin_input(
+    capsys: pytest.CaptureFixture[str],
+    tmpfile: pathlib.Path,
+) -> None:
+    with pathlib.Path('eppels.png').open() as f:
+        sys.stdin = f
+        main(f'- -d -o {tmpfile}'.split())
+    capture = capsys.readouterr()
+    assert 'image dimensions' in capture.err
+    assert '⣿' in tmpfile.read_text()
+
+
+@mock.patch('p.sys.stdout.fileno', side_effect=lambda: 1)
+@mock.patch('p.get_ioctl_windowsize')
+def test_stdin_input_fit_width(
+    get_ioctl_windowsize_mock: mock.MagicMock,
+    _sys_stdout_fileno_mock: mock.MagicMock,
+    tmpfile: pathlib.Path,
+) -> None:
+    def _get_ioctl_windowsize(dev: TextIO) -> tuple[int, int, int, int]:
+        if dev.fileno() == 1:
+            return (39, 40, 360, 741)
+        raise OSError('[Errno 25] Inappropriate ioctl for device 🤡')
+
+    get_ioctl_windowsize_mock.side_effect = _get_ioctl_windowsize
+    with pathlib.Path('eppels.png').open() as stdin:
+        sys.stdin = stdin
+        main(f'- -d -o {tmpfile} -xy'.split())
+    assert len(tmpfile.read_text().split('\n')[0]) == 40
+
+
+def test_stdin_input_inappropriate_ioctl_for_device(
+    tmpfile: pathlib.Path,
+) -> None:
+    with (
+        pathlib.Path('eppels.png').open() as stdin,
+        tmpfile.open('w+') as stdout
+    ):
+        sys.stdin = stdin
+        sys.stdout = stdout
+        assert terminal_rcwh(sys.stdin, sys.stdout)
 
 
 @pytest.fixture(scope='session')
