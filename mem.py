@@ -139,7 +139,27 @@ def test_execute_error() -> None:
     ]
 
 
-def update_blocks(blocks: list[Block]) -> str:
+def test_use_output_only_once() -> None:
+    blocks = run(process(dedent('''
+    ```bash
+    echo fya
+    ```
+
+    ```output
+    ```
+
+    something unrelated:
+
+    ```output
+    ```
+    ''').split('\n')))
+    assert blocks[3].blocktype == 'output'  # type: ignore[attr-defined]
+    assert blocks[3].lines == ['fya']
+    assert blocks[-2].blocktype == 'output'  # type: ignore[attr-defined]
+    assert blocks[-2].lines == []
+
+
+def run(blocks: list[Block]) -> list[Block]:
     output: list[str] = []
     for block in blocks:
         if not isinstance(block, Codeblock):
@@ -148,7 +168,14 @@ def update_blocks(blocks: list[Block]) -> str:
             output = execute(block)
         elif block.blocktype == 'output':
             block.overwrite(output)
-    return '\n'.join(block.print() for block in blocks)
+            output.clear()
+    return blocks
+
+
+def update_blocks(blocks: list[Block]) -> str:
+    return '\n'.join(
+        block.print() for block in run(blocks)
+    )
 
 
 def main(outfile: str = '/dev/stdout') -> None:
