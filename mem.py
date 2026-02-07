@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 import pathlib
 import subprocess
 import tempfile
+import sys
 from typing import Literal, cast
 from textwrap import dedent
 
@@ -139,7 +139,7 @@ def test_execute_error() -> None:
     ]
 
 
-def main(blocks: list[Block]) -> None:
+def update_blocks(blocks: list[Block]) -> str:
     output: list[str] = []
     for block in blocks:
         if not isinstance(block, Codeblock):
@@ -148,10 +148,16 @@ def main(blocks: list[Block]) -> None:
             output = execute(block)
         elif block.blocktype == 'output':
             block.overwrite(output)
-    print(
-        '\n'.join(block.print() for block in blocks)
+    return '\n'.join(block.print() for block in blocks)
+
+
+def main(outfile: str = '/dev/stdout') -> None:
+    blocks = process(
+        pathlib.Path('readme.md').read_text().split('\n')
     )
+    with pathlib.Path(outfile).open('w') as f:
+        print(update_blocks(blocks), file=f)
 
 
 if __name__ == '__main__':
-    main(process(pathlib.Path('readme.md').read_text().split('\n')))
+    main('/dev/stdout' if len(sys.argv) < 2 else sys.argv[-1])

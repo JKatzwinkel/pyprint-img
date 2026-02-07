@@ -2,24 +2,22 @@
 default: test type lint
 
 
+# make sure readme.md is up-to-date
+update-manual: update-help update-examples
+
+
 [doc("update usage instructions code block in readme.md \
 with the output of running cli --help again")]
-update-manual $TERM_RCWH='44x174x1723x911':
+update-help $TERM_RCWH='44x174x1723x911':
   #!/usr/bin/env bash
   set -euo pipefail
   sed -i -ne '/```help/ {p; r'<(python p.py -h) \
     -e ':a; n; /```/ {p; b}; ba}; p' readme.md
-  readarray examples < <(
-    sed -ne '/```bash/ {:a;n;p;n; /```$/ {=;b}; ba}; ' readme.md | \
-    sed 'N;s/\n/:::/'
-  )
-  for example in "${examples[@]}"; do
-    cmd="${example%:::*}"
-    lineno=$(echo -n "${example#*:::}" | tr -d '\n')
-    echo "${cmd}"
-    sed -i -ne $((lineno+2))',/```$/ {/```output/ {p; r'<($cmd) \
-      -e ':a; n; /```$/ {p; b}; ba}}; p' readme.md
-  done
+
+
+# run examples snippets in readme and update example outputs
+update-examples $TERM_RCWH='44x174x1723x911':
+  python mem.py readme.md
 
 
 # render preview for installed fonts supporting braille charset
@@ -61,12 +59,12 @@ take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174x1723x91
 # run pytest
 test pytest_args='':
   python -mpytest --capture=sys --doctest-modules p.py --cov . \
-    --cov-report term-missing {{pytest_args}} tests.py
+    --cov-report term-missing {{pytest_args}} tests.py mem.py
 
 # run flake8
 lint flake8_args='':
-  python -mflake8 p.py tests.py {{flake8_args}}
+  python -mflake8 p.py tests.py mem.py {{flake8_args}}
 
 # run mypy
 type mypy_args='':
-  python -mmypy --strict {{mypy_args}} tests.py
+  python -mmypy --strict {{mypy_args}} tests.py mem.py
