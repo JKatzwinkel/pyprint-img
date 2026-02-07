@@ -9,7 +9,7 @@ converts image files into monochrome unicode text utilizing the braille charset.
 
 ```help
 usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-d] [-y] [-z FACTOR | -x] [-v] [-a]
-            [-b LEVEL] [-e [FACTOR]] [-D METH | --floyd] [-t NUM]
+            [-A] [-b LEVEL] [-e [FACTOR]] [-D METH | --floyd] [-t NUM]
             FILE
 
 rasterize an image into the terminal.
@@ -31,6 +31,7 @@ options:
   -v, --invert          invert 'pixel' values of output.
   -a, --sharpen         enhance input image by emphasizing edges a little (the
                         more often the option gets repeated, the more).
+  -A, --aliasing        disable antialiasing.
   -b, --brightness LEVEL
                         adjust brightness in percent (default: 100).
   -t, --threshold-arg NUM
