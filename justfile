@@ -17,7 +17,7 @@ update-help $TERM_RCWH='44x174x1723x911':
 
 # run examples snippets in readme and update example outputs
 update-examples $TERM_RCWH='44x174x1723x911':
-  python mem.py readme.md
+  python util/doc_examples.py readme.md
 
 
 # render preview for installed fonts supporting braille charset
@@ -59,12 +59,12 @@ take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174x1723x91
 # run pytest
 test pytest_args='':
   python -mpytest --capture=sys --doctest-modules p.py --cov . \
-    --cov-report term-missing {{pytest_args}} tests.py mem.py
+    --cov-report term-missing {{pytest_args}} tests.py util/*
 
 # run flake8
 lint flake8_args='':
-  python -mflake8 p.py tests.py mem.py {{flake8_args}}
+  python -mflake8 p.py tests.py util/ {{flake8_args}}
 
 # run mypy
 type mypy_args='':
-  python -mmypy --strict {{mypy_args}} tests.py mem.py
+  python -mmypy --strict {{mypy_args}} tests.py util/
