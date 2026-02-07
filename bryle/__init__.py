@@ -4,12 +4,12 @@ import pathlib
 import struct
 import sys
 import termios
-import unicodedata
 from typing import Callable, Iterable, Literal, TextIO
 
 from PIL import Image, ImageChops, ImageFilter
 
 from .args import parse_args
+from .chars import braille
 from .p import (
     DITHER_ERROR_RECIPIENTS, ThresholdFunc, get_threshold_func,
     thr_local_avg_factory,
@@ -80,25 +80,6 @@ def terminal_rcwh(
         except Exception as e:
             Debug.log(f'getting terminal size failed for device {dev}: {e}')
     return fallback_values
-
-
-def char_name(matrix: list[bool], inverted: bool = False) -> str:
-    '''
-    >>> char_name([False, True, True, False])
-    'BRAILLE PATTERN DOTS-23'
-
-    >>> char_name([False, True, True, False], inverted=True)
-    'BRAILLE PATTERN DOTS-14'
-
-    >>> char_name([])
-    'BRAILLE PATTERN BLANK'
-    '''
-    key = ''.join(
-        f'{i+1}' for i, b in enumerate(matrix) if b != inverted
-    )
-    return f'BRAILLE PATTERN DOTS-{key}' if key else (
-        'BRAILLE PATTERN BLANK'
-    )
 
 
 def sharpen(
@@ -233,13 +214,13 @@ def rasterize(
                     max_col * 2 * (cy * 4 + dy) + cx * 2 + dx
                 ]
                 for dx, dy in (
-                    (0, 0), (0, 1), (0, 2), (1, 0),
-                    (1, 1), (1, 2), (0, 3), (1, 3),
+                    (0, 0), (1, 0),
+                    (0, 1), (1, 1),
+                    (0, 2), (1, 2),
+                    (0, 3), (1, 3),
                 )
             ]
-            row.append(
-                unicodedata.lookup(char_name(registers, inverted=inverted))
-            )
+            row.append(braille(*registers))
         yield ''.join(row)
 
 
