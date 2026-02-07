@@ -53,8 +53,8 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: re-generate cli output examples in readme file
-        run: just update-manual
+      - name: ':memo: update code examples in readme.md'
+        run: just doc
 
       - name: install imagemagick
         uses: mfinelli/setup-imagemagick@v7.0.1

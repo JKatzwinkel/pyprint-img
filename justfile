@@ -2,13 +2,15 @@
 default: test type lint
 
 
+alias update-manual := doc
+
 # make sure readme.md is up-to-date
-update-manual: update-help update-examples
+doc: doc-help doc-examples
 
 
 [doc("update usage instructions code block in readme.md \
 with the output of running cli --help again")]
-update-help $TERM_RCWH='44x174x1723x911':
+doc-help $TERM_RCWH='44x174x1723x911':
   #!/usr/bin/env bash
   set -euo pipefail
   sed -i -ne '/```help/ {p; r'<(python p.py -h) \
@@ -16,7 +18,7 @@ update-help $TERM_RCWH='44x174x1723x911':
 
 
 # run examples snippets in readme and update example outputs
-update-examples $TERM_RCWH='44x174x1723x911':
+doc-examples $TERM_RCWH='44x174x1723x911':
   python util/doc_examples.py readme.md
 
 
