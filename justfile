@@ -1,6 +1,8 @@
 # alias for `test`, `type`, && `lint` recipes
 default: test type lint
 
+help:
+  python p.py -h
 
 [doc("update usage instructions code block in readme.md \
 with the output of running cli --help again")]

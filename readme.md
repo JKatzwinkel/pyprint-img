@@ -292,11 +292,11 @@ python p.py --threshold percentile -t 35 -z 2 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
 
-the `extremes` mode just calculates the threshold right between the darkest and
+the `extrema` mode just calculates the threshold right between the darkest and
 the lightest pixel values, without regard for their respective frequency.
 
 ```bash
-python p.py -m extremes -z 2 eppels.png
+python p.py -m extrema -z 2 eppels.png
 ```
 
 ```output

@@ -341,7 +341,7 @@ def scale_image(
 THRESHOLD_FUNC_FACTORIES: dict[
     str, tuple[ThresholdFuncFactory, tuple[int, int] | None, int | None]
 ] = {
-    'extremes': (thr_btw_extr_factory, None, None),
+    'extrema': (thr_btw_extr_factory, None, None),
     'median': (thr_median_factory, None, None),
     'percentile': (thr_percentile_factory, (0, 99), 50),
     'const': (thr_const_factory, (0, 255), 127),
