@@ -50,6 +50,13 @@ dithering options:
   -D, --dmethod METH    dither method to use (one of atkinson|floyd-steinberg,
                         default: atkinson).
   --floyd               shortcut for -Dfloyd-steinberg
+
+p.py reads the environment variable TERM_RCWH which when set bypasses any
+attempt at determining actual terminal && xterm window sizes from tty and
+ioctl and forces fixed terminal and optionally window size to be used for
+image processing. TERM_RCWH accepts values in the forms `RxC` and `RxCxWxH`
+where `RxC` is terminal size in rows and columns and `WxH` is window width and
+hieght in pixels.
 ```
 
 
