@@ -407,6 +407,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
             '''
         ),
         parents=[argp_thr, argp_out],
+        epilog=(
+            '%(prog)s reads the environment variable TERM_RCWH which when set '
+            'bypasses any attempt at determining actual terminal && xterm '
+            'window sizes from tty and ioctl and forces fixed terminal and '
+            'optionally window size to be used for image processing. '
+            'TERM_RCWH accepts values in the forms `RxC` and `RxCxWxH` '
+            'where `RxC` is terminal size in rows '
+            'and columns and `WxH` is window width and hieght in pixels.'
+        ),
     )
     argp.add_argument(
         'inputfile', type=str, metavar='FILE',

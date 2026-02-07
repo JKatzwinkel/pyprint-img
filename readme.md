@@ -210,8 +210,10 @@ sizes from `ioctl`. If neither `stdin` nor `stdout` are a terminal, actual sizes
 cannot be determined and passing of a fixed terminal size might be necessary:
 
 ```bash
+# set fixed terminal size in rows×cols
 export TERM_RCWH=20x79
-cat shelly.jpg | python p.py - -dxye.3 2>&1 | cat
+# run braillify with no tty at neither stdin nor stdout
+cat shelly.jpg | python p.py - -dxye.3 2>&1 > >(cat)
 ```
 
 ```output
