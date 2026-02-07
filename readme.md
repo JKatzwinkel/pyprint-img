@@ -85,7 +85,7 @@ python p.py eppels.png
 
 read from stdin by passing `-` as the file argument:
 
-```shell
+```bash
 cat eppels.png | python p.py -
 ```
 
@@ -104,7 +104,6 @@ this is useful for integrating with other command-line tools:
 ```shell
 curl -s https://example.com/image.png | python p.py -
 ```
-
 
 enable dithering but invert color values:
 
@@ -181,6 +180,27 @@ python p.py eppels.png -t 5 -aaa
 ⣾⣿⠿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣶⣿⣿⣿⢿⣟⢫⣽
 ```
 
+enable debug messages to `/dev/stderr` with the `-d`/`--debug` flag.
+
+```bash
+TERM_RCWH=5x20 python p.py eppels.png -dxy 2>&1
+```
+
+```output
+```
+
+the `TERM_RCWH` environment variable can be used to pass fixed terminal
+dimensions and to bypass attempts to determine terminal and terminal window
+sizes from `ioctl`. If neither `stdin` nor `stdout` are a terminal, actual sizes
+cannot be determined and passing of a fixed terminal size might be necessary:
+
+```bash
+export TERM_RCWH=20x79
+cat shelly.jpg | python p.py - -dxye.3 2>&1 | cat
+```
+
+```output
+```
 
 ### threshold modes
 
