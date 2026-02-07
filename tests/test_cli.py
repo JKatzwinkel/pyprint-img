@@ -115,7 +115,7 @@ def test_cli_creates_file(
     _terminal_rcwh_mock: mock.MagicMock, tmpfile: pathlib.Path,
 ) -> None:
     outfile = tmpfile
-    main(f'eppels.png -o {outfile}'.split())
+    main(f'eppels.png -o {outfile} -A'.split())
     assert outfile.exists()
     with pytest.raises(SystemExit):
         main(f'irrelevant.jpg -o {outfile}'.split())

@@ -124,6 +124,7 @@ type DitherMethod = Literal['atkinson', 'floyd-steinberg']
 
 def sample_func(
     image: Image.Image, sx: float, sy: float,
+    interpolate: bool = True,
 ) -> Callable[[int, int], int]:
 
     def getpixel(px: int, py: int) -> int:
@@ -149,6 +150,8 @@ def sample_func(
         px, py = sx * x, sy * y
         if px > image.width or py > image.height:
             return 0
+        if not interpolate:
+            return getpixel(px, py)
         v1, v2, v3, v4 = getvalues(px, py)
         dx = px - int(px)
         wx1 = v1 + (v2 - v1) * dx
@@ -170,6 +173,7 @@ def rasterize(
     dither_method: DitherMethod = 'atkinson',
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
+    interpolate: bool = True,
     rcwh_func: Callable[
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
@@ -204,7 +208,7 @@ def rasterize(
     )
     max_col = min(round(image.width * zoom / cw), c)
     Debug.log(f'using {max_col} columns × {max_row} rows')
-    sample = sample_func(image, sx, sy)
+    sample = sample_func(image, sx, sy, interpolate=interpolate)
     grid: list[list[float]] = [
         [sample(x, y) for x in range(max_col * 2)]
         for y in range(max_row * 4)
@@ -268,6 +272,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
         image,
         zoom=scale_image(image, options.zoom_factor),
         inverted=options.invert,
+        interpolate=not options.disable_antialiasing,
         crop_y=options.crop_y,
         edging=options.sharpen,
         dither=options.error_preservation_factor,

@@ -118,6 +118,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     argp.add_argument(
+        '-A', '--aliasing', dest='disable_antialiasing', action='store_true',
+        help='disable antialiasing.',
+    )
+    argp.add_argument(
         '-b', '--brightness', dest='brightness', type=int,
         default=100, metavar='LEVEL', choices=range(200),
         help='adjust brightness in percent (default: %(default)d).',
