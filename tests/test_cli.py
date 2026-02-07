@@ -8,15 +8,15 @@ from unittest import mock
 import tempfile
 import pytest
 
-from p import (
+from bryle import (
     DitherMethod,
     main,
-    parse_args,
     sample_func,
     scale_image,
     rasterize,
     terminal_rcwh,
 )
+from bryle.args import parse_args
 
 
 @pytest.mark.parametrize(
@@ -108,7 +108,7 @@ def tmpfile() -> Iterable[pathlib.Path]:
 
 
 @mock.patch(
-    'p.terminal_rcwh',
+    'bryle.terminal_rcwh',
     side_effect=lambda: (44, 174, 1914, 1012),
 )
 def test_cli_creates_file(
@@ -128,7 +128,7 @@ def test_cli_creates_file(
         '20x44',
     )
 )
-@mock.patch('p.os.environ.get')
+@mock.patch('bryle.os.environ.get')
 def test_overwrite_terminal_size_via_env_var(
     os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
@@ -144,7 +144,7 @@ def test_overwrite_terminal_size_via_env_var(
 @pytest.mark.parametrize(
     'columns', (13, 52, 91)
 )
-@mock.patch('p.os.environ.get')
+@mock.patch('bryle.os.environ.get')
 def test_fit_to_width(
     os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
@@ -171,8 +171,8 @@ def test_stdin_input(
     assert '⣿' in tmpfile.read_text()
 
 
-@mock.patch('p.sys.stdout.fileno', side_effect=lambda: 1)
-@mock.patch('p.get_ioctl_windowsize')
+@mock.patch('bryle.sys.stdout.fileno', side_effect=lambda: 1)
+@mock.patch('bryle.get_ioctl_windowsize')
 def test_stdin_input_fit_width(
     get_ioctl_windowsize_mock: mock.MagicMock,
     _sys_stdout_fileno_mock: mock.MagicMock,
