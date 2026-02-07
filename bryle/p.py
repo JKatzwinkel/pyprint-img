@@ -59,9 +59,11 @@ def thr_local_avg_factory(
         if pixel[0] > image.width or pixel[1] > image.height:
             return 0
         assert isinstance(
-            result := averaged.getpixel(pixel), int  # type: ignore[arg-type]
+            pixelvalue := pixels[
+                int(pixel[0]) + int(pixel[1]) * image.width
+            ], int
         )
-        return result
+        return pixelvalue
     blur_radius = blur_radius or max(
         12, min(image.width, image.height) // 16
     )
@@ -73,6 +75,7 @@ def thr_local_avg_factory(
         'min/max threshold values used in `local` mode: '
         f'{averaged.getextrema()}'
     )
+    pixels = averaged.get_flattened_data()
     return threshold
 
 

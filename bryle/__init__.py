@@ -127,8 +127,10 @@ def sample_func(
     interpolate: bool = True,
 ) -> Callable[[int, int], int]:
 
+    pixels = image.get_flattened_data()
+
     def getpixel(px: int, py: int) -> int:
-        pixelvalue = image.getpixel((px, py)) or 0
+        pixelvalue = pixels[px + py * image.width]
         assert isinstance(pixelvalue, int), f'{pixelvalue}'
         return pixelvalue
 
