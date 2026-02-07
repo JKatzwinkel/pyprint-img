@@ -36,6 +36,8 @@ from p import (
         ('-z fya f.png', True),
         ('-z 1.2 f.png', False),
         ('--dither .5 f.png', False),
+        ('f.png --dith', False),
+        ('f.png -e', False),
         ('--floyd -Datkinson f.png', True),
         ('-Dfloyd f.png', True),
         ('--fl f.png', False),

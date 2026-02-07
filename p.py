@@ -472,9 +472,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     argp_dither = argp.add_argument_group('dithering options')
     argp_dither.add_argument(
         '-e', '--dither', dest='error_preservation_factor', type=float,
-        default=0, metavar='FACTOR',
+        nargs='?', const=1., default=0., metavar='FACTOR',
         help=(
-            'error preservation factor/dithering ratio (default: %(default)s).'
+            'error preservation factor/dithering ratio. '
+            'accepts an optional %(type)s value and assumes %(const)s '
+            'if omitted. (default: %(default)s).'
         ),
     )
     argp_dither_method = argp_dither.add_mutually_exclusive_group()

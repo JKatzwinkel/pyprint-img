@@ -414,11 +414,12 @@ python p.py -m const -z 2 -t 160 eppels.png
 
 ### dithering
 
-the `-e`/`--dither` option changes the degree to which the result of the
-monochrome mapping error function is being distributed to neighboring pixels.
+the `-e`/`--dither` option turns on dithering or changes the degree to which the
+result of the monochrome mapping error function is being distributed to
+neighboring pixels.
 
 ```bash
-python p.py eppels.png -z 2 -e 1
+python p.py eppels.png -z 2 --dither
 ```
 
 ```output
