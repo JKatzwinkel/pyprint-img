@@ -10,7 +10,7 @@ doc: doc-help doc-examples
 
 [doc("update usage instructions code block in readme.md \
 with the output of running cli --help again")]
-doc-help $TERM_RCWH='44x174x1723x911':
+doc-help $TERM_RCWH='44x174':
   #!/usr/bin/env bash
   set -euo pipefail
   sed -i -ne '/```help/ {p; r'<(python p.py -h) \
@@ -18,7 +18,7 @@ doc-help $TERM_RCWH='44x174x1723x911':
 
 
 # run examples snippets in readme and update example outputs
-doc-examples $TERM_RCWH='44x174x1723x911':
+doc-examples $TERM_RCWH='44x174':
   python util/doc_examples.py readme.md
 
 
@@ -39,7 +39,7 @@ font-preview:
 
 
 # take a screenshot && replace image file at screenshot.png
-take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174x1723x911':
+take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174':
   #!/usr/bin/env bash
   FONT_PS=$(fc-list ':mono' file | grep -im1 'dejavu')
   echo "prompt font: ${FONT_PS%:*}"
