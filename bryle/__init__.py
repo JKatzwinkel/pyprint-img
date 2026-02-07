@@ -151,7 +151,7 @@ def sample_func(
         if px > image.width or py > image.height:
             return 0
         if not interpolate:
-            return getpixel(round(px), round(py))
+            return getpixel(int(px), int(py))
         v1, v2, v3, v4 = getvalues(px, py)
         dx = px - int(px)
         wx1 = v1 + (v2 - v1) * dx
