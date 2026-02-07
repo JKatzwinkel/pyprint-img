@@ -96,7 +96,7 @@ def test_cli_debug_output(
     load_cached_image: Callable[[str], Image.Image],
 ) -> None:
     main(
-        'eppels.png -z .5 -o /dev/null -f -dA'.split(),
+        'eppels.png -z .5 -o /dev/null -f -dA'.split(),  # noqa: SIM905
         load_image_file_func=load_cached_image,
     )
     stderr = capsys.readouterr().err
