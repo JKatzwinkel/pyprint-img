@@ -160,6 +160,8 @@ def thr_local_avg_factory(
     image: Image.Image, blur_radius: int = 0
 ) -> ThresholdFunc:
     def threshold(pixel: tuple[float, float]) -> int:
+        if pixel[0] > image.width or pixel[1] > image.height:
+            return 0
         assert isinstance(
             result := averaged.getpixel(pixel), int  # type: ignore[arg-type]
         )
@@ -233,6 +235,8 @@ def sample_func(
 
     def sample(x: int, y: int) -> int:
         px, py = sx * x, sy * y
+        if px > image.width or py > image.height:
+            return 0
         v1, v2, v3, v4 = getvalues(px, py)
         dx = px - int(px)
         wx1 = v1 + (v2 - v1) * dx
@@ -283,10 +287,10 @@ def rasterize(
         f'sample rate in pixels: {sx:.2f} horizontal, {sy:.2f} vertical'
     )
     image = sharpen(image.convert('L'), edging, cw)
-    max_row = int(image.height * zoom / ch) if not crop_y else min(
-        int(image.height * zoom / ch), r
+    max_row = round(image.height * zoom / ch) if not crop_y else min(
+        round(image.height * zoom / ch), r
     )
-    max_col = int(min(image.width * zoom / cw, c))
+    max_col = min(round(image.width * zoom / cw), c)
     Debug.log(f'using {max_col} columns × {max_row} rows')
     sample = sample_func(image, sx, sy)
     grid: list[list[float]] = [

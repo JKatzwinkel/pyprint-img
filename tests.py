@@ -121,24 +121,40 @@ def test_cli_creates_file(
 
 
 @pytest.mark.parametrize(
-    'rcwh_var, expected_width', (
-        ('44x174x1723x911', 173),  # XXX weird
-        ('20x44', 44),
+    'rcwh_var', (
+        '44x174x1723x911',
+        '20x44',
     )
 )
-@mock.patch(
-    'p.os.environ.get',
-    side_effect=lambda k: '44x174x1723x911',
-)
+@mock.patch('p.os.environ.get')
 def test_overwrite_terminal_size_via_env_var(
     os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
-    rcwh_var: str, expected_width: int,
+    rcwh_var: str,
 ) -> None:
     os_environ_get_mock.side_effect = lambda k: rcwh_var
     main(f'eppels.png -o {tmpfile} -xyd'.split())
     output = tmpfile.read_text().split('\n')
+    expected_width = int(rcwh_var.split('x')[1])
     assert len(output[0]) == expected_width
+
+
+@pytest.mark.parametrize(
+    'columns', (13, 52, 91)
+)
+@mock.patch('p.os.environ.get')
+def test_fit_to_width(
+    os_environ_get_mock: mock.MagicMock,
+    tmpfile: pathlib.Path,
+    columns: int,
+) -> None:
+    os_environ_get_mock.side_effect = lambda k: f'20x{columns}'
+    main(f'eppels.png -o {tmpfile} -xyd'.split())
+    output = tmpfile.read_text().split('\n')
+    assert len(output[2]) == columns, (
+        f'output lines should be {columns} columns in length '
+        f'but are {len(output[2])}'
+    )
 
 
 def test_stdin_input(
