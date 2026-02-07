@@ -411,6 +411,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
             '''
         ),
         parents=[argp_thr, argp_out],
+        epilog=(
+            '%(prog)s reads the environment variable TERM_RCWH which when set '
+            'bypasses any attempt at determining actual terminal && xterm '
+            'window sizes from tty and ioctl and forces fixed terminal and '
+            'optionally window size to be used for image processing. '
+            'TERM_RCWH accepts values in the forms `RxC` and `RxCxWxH` '
+            'where `RxC` is terminal size in rows '
+            'and columns and `WxH` is window width and hieght in pixels.'
+        ),
     )
     argp.add_argument(
         'inputfile', type=str, metavar='FILE',
@@ -467,9 +476,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     argp_dither = argp.add_argument_group('dithering options')
     argp_dither.add_argument(
         '-e', '--dither', dest='error_preservation_factor', type=float,
-        default=0, metavar='FACTOR',
+        nargs='?', const=1., default=0., metavar='FACTOR',
         help=(
-            'error preservation factor/dithering ratio (default: %(default)s).'
+            'error preservation factor/dithering ratio. '
+            'accepts an optional %(type)s value and assumes %(const)s '
+            'if omitted. (default: %(default)s).'
         ),
     )
     argp_dither_method = argp_dither.add_mutually_exclusive_group()
