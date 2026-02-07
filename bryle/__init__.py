@@ -254,7 +254,18 @@ def scale_image(
     return zoom_factor
 
 
-def main(argv: list[str] = sys.argv[1:]) -> int:
+def load_image_file(filename: str) -> Image.Image:
+    if filename == '-':
+        return Image.open(sys.stdin.buffer).copy()
+    return Image.open(pathlib.Path(filename)).copy()
+
+
+def main(
+    argv: list[str] = sys.argv[1:],
+    load_image_file_func: Callable[
+        [str], Image.Image
+    ] = load_image_file,
+) -> int:
     options = parse_args(argv)
     if not options.output_overwrite and options.outputfile.exists():
         print(
@@ -263,10 +274,7 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
             file=sys.stderr
         )
         sys.exit(1)
-    if options.inputfile == '-':
-        image = Image.open(sys.stdin.buffer).copy()
-    else:
-        image = Image.open(pathlib.Path(options.inputfile)).copy()
+    image = load_image_file_func(options.inputfile)
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
     rows = list(rasterize(
         image,

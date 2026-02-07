@@ -64,7 +64,8 @@ take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174':
 # run pytest
 test pytest_args='':
   python -mpytest --capture=sys --doctest-modules --cov bryle \
-    --cov-report term-missing {{pytest_args}} tests/ util/*
+    --cov-report term-missing {{pytest_args}} tests/ util/* \
+    --durations 14
 
 # run flake8
 lint flake8_args='':

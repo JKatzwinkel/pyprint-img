@@ -1,6 +1,6 @@
 import pathlib
 import sys
-from typing import Iterable, TextIO
+from typing import Callable, Iterable, TextIO
 
 from PIL import Image
 
@@ -91,8 +91,14 @@ def test_cli_help(
         )
 
 
-def test_cli_debug_output(capsys: pytest.CaptureFixture[str]) -> None:
-    main('eppels.png -z .5 -o /dev/null -f -d'.split())  # noqa: SIM905
+def test_cli_debug_output(
+    capsys: pytest.CaptureFixture[str],
+    load_cached_image: Callable[[str], Image.Image],
+) -> None:
+    main(
+        'eppels.png -z .5 -o /dev/null -f -dA'.split(),
+        load_image_file_func=load_cached_image,
+    )
     stderr = capsys.readouterr().err
     assert 'resize image to 50.0%' in stderr
     assert 'image dimensions: 202×151' in stderr
@@ -107,19 +113,35 @@ def tmpfile() -> Iterable[pathlib.Path]:
         outfile.unlink()
 
 
+@pytest.fixture(scope='session')
+def load_cached_image(
+    image: Image.Image
+) -> Iterable[Callable[[str], Image.Image]]:
+    yield lambda filename: image
+
+
 @mock.patch(
     'bryle.terminal_rcwh',
     side_effect=lambda: (44, 174, 1914, 1012),
 )
 def test_cli_creates_file(
     _terminal_rcwh_mock: mock.MagicMock, tmpfile: pathlib.Path,
+    load_cached_image: Callable[[str], Image.Image],
 ) -> None:
     outfile = tmpfile
-    main(f'eppels.png -o {outfile} -A'.split())
+    main(
+        f'eppels.png -o {outfile} -A'.split(),
+        load_image_file_func=load_cached_image,
+    )
     assert outfile.exists()
     with pytest.raises(SystemExit):
-        main(f'irrelevant.jpg -o {outfile}'.split())
-    assert main(f'shelly.jpg -fo {outfile}'.split()) == 0
+        main(
+            f'irrelevant.jpg -o {outfile}'.split(),
+        )
+    assert main(
+        f'shelly.jpg -fo {outfile} -A'.split(),
+        load_image_file_func=load_cached_image,
+    ) == 0
 
 
 @pytest.mark.parametrize(
@@ -132,10 +154,14 @@ def test_cli_creates_file(
 def test_overwrite_terminal_size_via_env_var(
     os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
+    load_cached_image: Callable[[str], Image.Image],
     rcwh_var: str,
 ) -> None:
     os_environ_get_mock.side_effect = lambda k: rcwh_var
-    main(f'eppels.png -o {tmpfile} -xyd'.split())
+    main(
+        f'eppels.png -o {tmpfile} -xydA'.split(),
+        load_image_file_func=load_cached_image,
+    )
     output = tmpfile.read_text().split('\n')
     expected_width = int(rcwh_var.split('x')[1])
     assert len(output[0]) == expected_width
@@ -148,10 +174,14 @@ def test_overwrite_terminal_size_via_env_var(
 def test_fit_to_width(
     os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
+    load_cached_image: Callable[[str], Image.Image],
     columns: int,
 ) -> None:
     os_environ_get_mock.side_effect = lambda k: f'20x{columns}'
-    main(f'eppels.png -o {tmpfile} -xyd'.split())
+    main(
+        f'eppels.png -o {tmpfile} -xydA'.split(),
+        load_image_file_func=load_cached_image,
+    )
     output = tmpfile.read_text().split('\n')
     assert len(output[2]) == columns, (
         f'output lines should be {columns} columns in length '
@@ -214,7 +244,7 @@ def image() -> Image.Image:
         ('atkinson', ['⡪⡪'], False),
         ('atkinson', ['⢕⢕'], False),
         ('atkinson', ['⣺⡺'], False),
-        ('floyd-steinberg', ['⢕⢕', '⡪⡪'], True),
+        ('floyd-steinberg', ['⢕⢕', '⡪⡪', '⡯⡯'], True),
         ('floyd-steinberg', ['⣺⡺'], True),
     )
 )
@@ -226,6 +256,7 @@ def test_dither_method(
     for line in rasterize(
         image, dither_method=method, dither=.7, zoom=2,
         rcwh_func=lambda: (44, 174, 1914, 1012),
+        interpolate=False,
     ):
         result.append(line)
         if any(pattern in line for pattern in patterns):
@@ -252,6 +283,7 @@ def test_fit_to_window(image: Image.Image) -> None:
         line for line in rasterize(
             image, crop_y=True, rcwh_func=rcwh_func,
             zoom=scale_image(image, 0, rcwh_func=rcwh_func),
+            interpolate=False,
         )
     ]
     assert len(lines) == 11
