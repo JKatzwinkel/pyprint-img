@@ -62,23 +62,18 @@ jobs:
       - name: ':memo: update screenshot'
         run: just take-screenshot
 
-      - name: upload screenshot as github artifact
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          path: screenshot.png
-
-      - name: see if something changed
-        id: changed
+      - name: check for changes in doc resources
+        id: diff
         run: |
           chg=$(git diff --shortstat | wc -l)
-          echo "changed=${chg}" >> ${GITHUB_OUTPUT}
+          echo "changes=${chg}" >> ${GITHUB_OUTPUT}
 
       - name: show changes
-        if: steps.changed.outputs.changed != '0'
+        if: steps.diff.outputs.changes != '0'
         run: git diff
 
       - name: commit changes
-        if: steps.changed.outputs.changed != '0'
+        if: steps.diff.outputs.changes != '0'
         env:
           GIT_MAIL: >-
             41898282+github-actions[bot]@users.noreply.github.com
