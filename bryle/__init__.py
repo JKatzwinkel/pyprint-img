@@ -220,7 +220,7 @@ def rasterize(
                     (0, 3), (1, 3),
                 )
             ]
-            row.append(braille(*registers))
+            row.append(braille(registers, inverted=inverted))
         yield ''.join(row)
 
 
