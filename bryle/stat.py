@@ -25,11 +25,14 @@ def extrema(histogram: list[int]) -> tuple[int, int]:
     '''
     >>> extrema([0, 0, 3, 5, 7, 6, 0, 0, 1, 0])
     (2, 8)
+
+    >>> extrema([0, 0, 1, 0])
+    (2, 2)
     '''
     for i in range(len(histogram)):
         if histogram[i]:
             break
-    for j in range(len(histogram) - 1, i, -1):
+    for j in range(len(histogram) - 1, i - 1, -1):
         if histogram[j]:
             break
     return (i, j)
