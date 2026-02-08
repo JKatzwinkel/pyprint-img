@@ -1,14 +1,33 @@
+from PIL import Image
+
 import pytest
 
-from bryle.stat import extrema
+from bryle.stat import errbar, extrema, plot
+
+
+def test_extrema(image: Image.Image) -> None:
+    assert extrema(image.histogram()) == image.getextrema()
 
 
 @pytest.mark.parametrize(
-    'bins, expect', (
+    'bins, bar', (
         (
-            [0, 0, 1, 0], (2, 2)
+            [1,  1, 1, 1],
+            '┝╋━┥',
+        ),
+        (
+            [0,  0, 0, 4, 0, 0, 0, 0],
+            '   ╋',
+        ),
+        (
+            [0,  0, 0, 4, 5, 0, 0, 0],
+            '   ┝┥',
+        ),
+        (
+            [1,  0, 0, 2, 5, 0, 1, 0],
+            '┝━━━╋━┥',
         ),
     )
 )
-def test_extrema(bins: list[int], expect: tuple[int, int]) -> None:
-    assert extrema(bins) == expect
+def test_errorbars(bins: list[int], bar: str) -> None:
+    assert errbar(bins) == bar

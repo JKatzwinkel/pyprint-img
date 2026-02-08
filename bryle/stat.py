@@ -38,6 +38,12 @@ def extrema(histogram: list[int]) -> tuple[int, int]:
     return (i, j)
 
 
+def minmedmax(histogram: list[int]) -> list[int]:
+    return sorted(
+        list(extrema(histogram)) + [percentile(histogram, 50)]
+    )
+
+
 def shrink(
     histogram: list[int],
     max_width: int,
@@ -92,9 +98,7 @@ def plot(histogram: list[int], c: int = 80, r: int = 10) -> Iterable[str]:
             line.append(braille(dots))
         yield ''.join(line)
         line.clear()
-    markers = sorted(
-        [i for i in extrema(histogram)] + [percentile(histogram, 50)]
-    )
+    markers = minmedmax(histogram)
     for i in range(len(histogram) // 2):
         if not markers or i * 2 < markers[0]:
             line.append('▔')
@@ -105,3 +109,27 @@ def plot(histogram: list[int], c: int = 80, r: int = 10) -> Iterable[str]:
             line.append('🭽')
         markers.pop(0)
     yield ''.join(line)
+
+
+def errbar(histogram: list[int], c: int = 80) -> str:
+    '''
+    >>> bins = [0, 0, 0, 2, 1, 4, 6, 5, 4, 3, 2, 1, 0, 1, 0, 0]
+    >>> errbar(bins)
+    '   ┝━━━╋━━━━━┥'
+
+    >>> errbar([0, 0, 0, 0, 10, 0, 0, 0])
+    '    ╋'
+
+    >>> errbar([0, 0, 0, 5, 5, 0, 0, 0])
+    '   ┝┥'
+    '''
+    histogram = shrink(histogram, c * 2)
+    markers = minmedmax(histogram)
+    line = [' '] * len(histogram)
+    for i in range(markers[0], markers[2]):
+        line[i] = '━'
+    line[markers[1]] = '╋'
+    if len(set(markers)) > 1:
+        line[markers[0]] = '┝'
+        line[markers[2]] = '┥'
+    return ''.join(line).rstrip()

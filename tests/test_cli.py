@@ -232,11 +232,6 @@ def test_stdin_input_inappropriate_ioctl_for_device(
         assert terminal_rcwh(sys.stdin, sys.stdout)
 
 
-@pytest.fixture(scope='session')
-def image() -> Image.Image:
-    return Image.open('eppels.png').convert('L')
-
-
 @pytest.mark.parametrize(
     'method, patterns, expected', (
         ('atkinson', ['⠳', '⢷'], True),
