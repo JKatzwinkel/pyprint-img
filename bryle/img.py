@@ -1,10 +1,11 @@
 import argparse
-from typing import Callable
+from collections import defaultdict
+from typing import Callable, Iterable
 
 from PIL import Image, ImageChops, ImageFilter
 
 from .util import Debug
-from .stat import percentile
+from .stat import boxplot, percentile, plot
 
 
 type ThresholdFunc = Callable[[tuple[float, float]], float]
@@ -93,3 +94,28 @@ def sharpen(
         )
     Debug.log(f'edge emphasis by factor {factor}')
     return image
+
+
+def find_thresholds(
+    image: Image.Image, options: argparse.Namespace,
+) -> list[int]:
+    func = get_threshold_func(image, options)
+    adjust_brightness = 100 / options.brightness
+    frequencies: dict[int, int] = defaultdict(int)
+    for py in range(0, image.height, 16):
+        for px in range(0, image.width, 16):
+            threshold = func((px, py)) * adjust_brightness
+            frequencies[round(threshold)] += 1
+    return [
+        frequencies[i] for i in range(256)
+    ]
+
+
+def plot_brightness_and_threshold(
+    image: Image.Image, options: argparse.Namespace,
+    cols: int = 80, rows: int = 8,
+) -> Iterable[str]:
+    histogram = image.histogram()
+    yield from plot(histogram, c=cols, r=rows, fns=True)
+    thresholds = find_thresholds(image, options)
+    yield boxplot(thresholds, c=cols)

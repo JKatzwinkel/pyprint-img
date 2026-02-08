@@ -74,7 +74,9 @@ def shrink(
     return histogram
 
 
-def plot(histogram: list[int], c: int = 80, r: int = 10) -> Iterable[str]:
+def plot(
+     histogram: list[int], c: int = 80, r: int = 10, fns: bool = False,
+) -> Iterable[str]:
     '''
     >>> bins = [0, 0, 0, 2, 1, 4, 6, 5, 4, 3, 2, 1, 0, 1, 0, 0]
     >>> for line in plot(bins, r=3):
@@ -86,6 +88,8 @@ def plot(histogram: list[int], c: int = 80, r: int = 10) -> Iterable[str]:
 
     '''
     histogram = shrink(histogram, c * 2)
+    if fns:
+        yield boxplot(histogram, c)
     max_frequency = max(histogram)
     bin_height = [
         r * b / max_frequency * 4 for b in histogram
@@ -123,13 +127,13 @@ def boxplot(histogram: list[int], c: int = 80) -> str:
     '''
     >>> bins = [0, 0, 0, 2, 1, 4, 6, 5, 4, 3, 2, 1, 0, 1, 0, 0]
     >>> boxplot(bins)
-    '   ───┾╋┽─────'
+    '   ───┾╋┽─────  '
 
     >>> boxplot([0, 0, 0, 0, 10, 0, 0, 0])
-    '    ╋'
+    '    ╋   '
 
     >>> boxplot([0, 0, 0, 5, 5, 0, 0, 0])
-    '   ╋┽'
+    '   ╋┽   '
     '''
     histogram = shrink(histogram, c)
     markers = five_number_summary(histogram)
@@ -141,4 +145,4 @@ def boxplot(histogram: list[int], c: int = 80) -> str:
     line[markers[1]] = '┾'
     line[markers[3]] = '┽'
     line[markers[2]] = '╋'
-    return ''.join(line).rstrip()
+    return ''.join(line)

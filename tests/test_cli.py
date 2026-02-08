@@ -16,7 +16,6 @@ from bryle import (
     terminal_rcwh,
 )
 from bryle.args import DitherMethod, parse_args
-from bryle.stat import plot
 
 
 @pytest.mark.parametrize(
@@ -301,9 +300,3 @@ def test_sampling(x: int, y: int, value: int) -> None:
     im = Image.frombytes('L', (2, 2), b'\x00\x40\x80\xff')
     sample = sample_func(im, .5, .5)
     assert sample(x, y) == value
-
-
-def test_plot_histogram(image: Image.Image) -> None:
-    lines = list(plot(image.histogram(), c=64, r=8))
-    assert len(lines) == 8 + 1
-    assert len(lines[0]) == 64

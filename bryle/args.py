@@ -127,7 +127,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     argp.add_argument(
         '-b', '--brightness', dest='brightness', type=int,
-        default=100, metavar='LEVEL', choices=range(200),
+        default=100, metavar='LEVEL', choices=range(1, 200),
         help='adjust brightness in percent (default: %(default)d).',
     )
     argp_dither = argp.add_argument_group('dithering options')
