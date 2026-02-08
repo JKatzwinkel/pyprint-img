@@ -88,7 +88,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
             f'(default: %(default)s for {out_options.outputfile}).'
         ),
     )
-    argp.add_argument(
+    argp_debug_group = argp.add_argument_group('debug options')
+    argp_debug_group.add_argument(
+        '-H', '--histogram', action='store_true', dest='histogram',
+        help='plot image histogram to stdout.',
+    )
+    argp_debug_group.add_argument(
         '-d', '--debug', action='store_true', dest='debug',
         help='preceed normal output with debug log printed to /dev/stderr.',
     )

@@ -300,7 +300,9 @@ python p.py eppels.png -z 2
 ```
 
 the radius affecting the brightness threshold used at any given pixel can be
-overwritten with the `-t`/`--threshold-arg` option.
+overwritten with the `-t`/`--threshold-arg` option. Option `-b/--brightness`
+allows to adjust the respective threshold values before sampling. Use the
+`-H/--histogram` flag to show the effects.
 
 ```bash
 python p.py eppels.png -z 2 -m local -t 14
@@ -325,6 +327,14 @@ python p.py eppels.png -z 2 -m local -t 14
 ⠿⠛⠉⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠀⠉⠙⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠿⢿⡆⠻⣿⣿⣿⠟
 ```
 
+```bash
+python p.py eppels.png -mlocal -t20 -b140 -H
+```
+
+```output
+```
+
+---
 
 the `median` mode on the other hand uses the median brightness across the entire
 image as its threshold, without adjusting for overall darker or lighter areas.
@@ -351,6 +361,8 @@ python p.py --threshold median -z 2 eppels.png
 ⣿⣿⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⠟⠛⠉⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠀⠈⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
+
+---
 
 the `percentile` mode is a generalized version of this and accepts a parameter
 specifying which percentile of the brightness distribution should be used as
@@ -379,6 +391,8 @@ python p.py --threshold percentile -t 35 -z 2 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
 
+---
+
 the `extrema` mode just calculates the threshold right between the darkest and
 the lightest pixel values, without regard for their respective frequency.
 
@@ -404,6 +418,8 @@ python p.py -m extrema -z 2 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
+
+---
 
 finally, it is possible to just pass the literal threshold value straight up
 into the thing using `-t`/`--threshold-arg` in the `const` mode:

@@ -1,3 +1,4 @@
+import argparse
 import fcntl
 import os
 import pathlib
@@ -12,6 +13,7 @@ from .args import DitherMethod, parse_args
 from .chars import braille
 from .img import (
     ThresholdFunc, get_threshold_func,
+    plot_brightness_and_threshold,
     sharpen, thr_local_avg_factory,
 )
 from .util import Debug
@@ -234,6 +236,18 @@ def load_image_file(filename: str) -> Image.Image:
     return Image.open(pathlib.Path(filename)).copy()
 
 
+def plot_image_histogram(
+    image: Image.Image, options: argparse.Namespace
+) -> int:
+    if image.mode != 'L':
+        image = image.convert('L')
+    for line in plot_brightness_and_threshold(image, options):
+        print(line)
+    if options.debug:
+        Debug.show(sys.stderr)
+    return 0
+
+
 def main(
     argv: list[str] = sys.argv[1:],
     load_image_file_func: Callable[
@@ -250,6 +264,8 @@ def main(
         sys.exit(1)
     image = load_image_file_func(options.inputfile)
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
+    if options.histogram:
+        return plot_image_histogram(image, options)
     rows = list(rasterize(
         image,
         zoom=get_zoom_factor(image, options.zoom_factor),
