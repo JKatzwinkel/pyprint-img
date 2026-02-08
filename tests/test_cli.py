@@ -9,14 +9,13 @@ import tempfile
 import pytest
 
 from bryle import (
-    DitherMethod,
     main,
     sample_func,
-    scale_image,
+    get_zoom_factor,
     rasterize,
     terminal_rcwh,
 )
-from bryle.args import parse_args
+from bryle.args import DitherMethod, parse_args
 from bryle.stat import plot
 
 
@@ -283,7 +282,7 @@ def test_fit_to_window(image: Image.Image) -> None:
     lines = [
         line for line in rasterize(
             image, crop_y=True, rcwh_func=rcwh_func,
-            zoom=scale_image(image, 0, rcwh_func=rcwh_func),
+            zoom=get_zoom_factor(image, 0, rcwh_func=rcwh_func),
             interpolate=False,
         )
     ]

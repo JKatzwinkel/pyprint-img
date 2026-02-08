@@ -4,15 +4,15 @@ import pathlib
 import struct
 import sys
 import termios
-from typing import Callable, Iterable, Literal, TextIO
+from typing import Callable, Iterable, TextIO
 
-from PIL import Image, ImageChops, ImageFilter
+from PIL import Image
 
-from .args import parse_args
+from .args import DitherMethod, parse_args
 from .chars import braille
-from .p import (
-    DITHER_ERROR_RECIPIENTS, ThresholdFunc, get_threshold_func,
-    thr_local_avg_factory,
+from .img import (
+    ThresholdFunc, get_threshold_func,
+    sharpen, thr_local_avg_factory,
 )
 from .util import Debug
 
@@ -82,25 +82,14 @@ def terminal_rcwh(
     return fallback_values
 
 
-def sharpen(
-    image: Image.Image, factor: int, blur_radius: float
-) -> Image.Image:
-    if factor < 1:
-        return image
-    smot = image.filter(ImageFilter.GaussianBlur(blur_radius))
-    for chops, images in (
-        (ImageChops.add, (image, smot)), (ImageChops.subtract, (smot, image))
-    ):
-        image = chops(
-            image, ImageChops.subtract(*images).point(
-                lambda p: p * factor
-            )
-        )
-    Debug.log(f'edge emphasis by factor {factor}')
-    return image
-
-
-type DitherMethod = Literal['atkinson', 'floyd-steinberg']
+DITHER_ERROR_RECIPIENTS = {
+    'atkinson': [
+        (1, 0, 2), (2, 0, 2), (-1, 1, 2), (0, 1, 2), (1, 1, 2), (0, 2, 2),
+    ],
+    'floyd-steinberg': [
+        (1, 0, 7), (-1, 1, 3), (0, 1, 5), (1, 1, 1),
+    ],
+}
 
 
 def sample_func(
@@ -153,7 +142,7 @@ def rasterize(
     crop_y: bool = False,
     edging: int = 0,
     dither: float = 0,
-    dither_method: DitherMethod = 'atkinson',
+    dither_method: DitherMethod = DitherMethod.atkinson,
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
     interpolate: bool = True,
@@ -226,7 +215,7 @@ def rasterize(
         yield ''.join(row)
 
 
-def scale_image(
+def get_zoom_factor(
     image: Image.Image, zoom_factor: float,
     rcwh_func: Callable[
         [], tuple[int, int, int, int]
@@ -263,7 +252,7 @@ def main(
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
     rows = list(rasterize(
         image,
-        zoom=scale_image(image, options.zoom_factor),
+        zoom=get_zoom_factor(image, options.zoom_factor),
         inverted=options.invert,
         interpolate=not options.disable_antialiasing,
         crop_y=options.crop_y,

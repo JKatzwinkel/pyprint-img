@@ -1,9 +1,13 @@
 import argparse
+from enum import StrEnum
 import pathlib
 import textwrap
 from typing import Callable
 
-from .p import DITHER_ERROR_RECIPIENTS, THRESHOLD_FUNC_FACTORIES
+from .img import THRESHOLD_FUNC_FACTORIES
+
+
+DitherMethod = StrEnum('DitherMethod', ['atkinson', 'floyd-steinberg'])
 
 
 def thr_arg_value_range_constraints(
@@ -142,7 +146,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         choices=('atkinson', 'floyd-steinberg'), default='atkinson',
         help=(
             'dither method to use ('
-            f'one of {"|".join(DITHER_ERROR_RECIPIENTS.keys())}, '
+            f'one of {"|".join(map(str, DitherMethod))}, '
             'default: %(default)s).'
         ),
     )

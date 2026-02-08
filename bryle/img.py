@@ -1,7 +1,7 @@
 import argparse
 from typing import Callable
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageChops, ImageFilter
 
 from .util import Debug
 from .stat import percentile
@@ -77,11 +77,19 @@ def get_threshold_func(
     )
 
 
-DITHER_ERROR_RECIPIENTS = {
-    'atkinson': [
-        (1, 0, 2), (2, 0, 2), (-1, 1, 2), (0, 1, 2), (1, 1, 2), (0, 2, 2),
-    ],
-    'floyd-steinberg': [
-        (1, 0, 7), (-1, 1, 3), (0, 1, 5), (1, 1, 1),
-    ],
-}
+def sharpen(
+    image: Image.Image, factor: int, blur_radius: float
+) -> Image.Image:
+    if factor < 1:
+        return image
+    smot = image.filter(ImageFilter.GaussianBlur(blur_radius))
+    for chops, images in (
+        (ImageChops.add, (image, smot)), (ImageChops.subtract, (smot, image))
+    ):
+        image = chops(
+            image, ImageChops.subtract(*images).point(
+                lambda p: p * factor
+            )
+        )
+    Debug.log(f'edge emphasis by factor {factor}')
+    return image
