@@ -1,9 +1,13 @@
 import argparse
+from enum import StrEnum
 import pathlib
 import textwrap
 from typing import Callable
 
-from .p import DITHER_ERROR_RECIPIENTS, THRESHOLD_FUNC_FACTORIES
+from .img import THRESHOLD_FUNC_FACTORIES
+
+
+DitherMethod = StrEnum('DitherMethod', ['atkinson', 'floyd-steinberg'])
 
 
 def thr_arg_value_range_constraints(
@@ -84,7 +88,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
             f'(default: %(default)s for {out_options.outputfile}).'
         ),
     )
-    argp.add_argument(
+    argp_debug_group = argp.add_argument_group('debug options')
+    argp_debug_group.add_argument(
+        '-H', '--histogram', action='store_true', dest='histogram',
+        help='plot image histogram to stdout.',
+    )
+    argp_debug_group.add_argument(
         '-d', '--debug', action='store_true', dest='debug',
         help='preceed normal output with debug log printed to /dev/stderr.',
     )
@@ -123,7 +132,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     argp.add_argument(
         '-b', '--brightness', dest='brightness', type=int,
-        default=100, metavar='LEVEL', choices=range(200),
+        default=100, metavar='LEVEL', choices=range(1, 200),
         help='adjust brightness in percent (default: %(default)d).',
     )
     argp_dither = argp.add_argument_group('dithering options')
@@ -142,7 +151,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         choices=('atkinson', 'floyd-steinberg'), default='atkinson',
         help=(
             'dither method to use ('
-            f'one of {"|".join(DITHER_ERROR_RECIPIENTS.keys())}, '
+            f'one of {"|".join(map(str, DitherMethod))}, '
             'default: %(default)s).'
         ),
     )

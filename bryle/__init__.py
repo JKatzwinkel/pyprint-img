@@ -1,18 +1,20 @@
+import argparse
 import fcntl
 import os
 import pathlib
 import struct
 import sys
 import termios
-import unicodedata
-from typing import Callable, Iterable, Literal, TextIO
+from typing import Callable, Iterable, TextIO
 
-from PIL import Image, ImageChops, ImageFilter
+from PIL import Image
 
-from .args import parse_args
-from .p import (
-    DITHER_ERROR_RECIPIENTS, ThresholdFunc, get_threshold_func,
-    thr_local_avg_factory,
+from .args import DitherMethod, parse_args
+from .chars import braille
+from .img import (
+    ThresholdFunc, get_threshold_func,
+    plot_brightness_and_threshold,
+    sharpen, thr_local_avg_factory,
 )
 from .util import Debug
 
@@ -82,44 +84,14 @@ def terminal_rcwh(
     return fallback_values
 
 
-def char_name(matrix: list[bool], inverted: bool = False) -> str:
-    '''
-    >>> char_name([False, True, True, False])
-    'BRAILLE PATTERN DOTS-23'
-
-    >>> char_name([False, True, True, False], inverted=True)
-    'BRAILLE PATTERN DOTS-14'
-
-    >>> char_name([])
-    'BRAILLE PATTERN BLANK'
-    '''
-    key = ''.join(
-        f'{i+1}' for i, b in enumerate(matrix) if b != inverted
-    )
-    return f'BRAILLE PATTERN DOTS-{key}' if key else (
-        'BRAILLE PATTERN BLANK'
-    )
-
-
-def sharpen(
-    image: Image.Image, factor: int, blur_radius: float
-) -> Image.Image:
-    if factor < 1:
-        return image
-    smot = image.filter(ImageFilter.GaussianBlur(blur_radius))
-    for chops, images in (
-        (ImageChops.add, (image, smot)), (ImageChops.subtract, (smot, image))
-    ):
-        image = chops(
-            image, ImageChops.subtract(*images).point(
-                lambda p: p * factor
-            )
-        )
-    Debug.log(f'edge emphasis by factor {factor}')
-    return image
-
-
-type DitherMethod = Literal['atkinson', 'floyd-steinberg']
+DITHER_ERROR_RECIPIENTS = {
+    'atkinson': [
+        (1, 0, 2), (2, 0, 2), (-1, 1, 2), (0, 1, 2), (1, 1, 2), (0, 2, 2),
+    ],
+    'floyd-steinberg': [
+        (1, 0, 7), (-1, 1, 3), (0, 1, 5), (1, 1, 1),
+    ],
+}
 
 
 def sample_func(
@@ -172,7 +144,7 @@ def rasterize(
     crop_y: bool = False,
     edging: int = 0,
     dither: float = 0,
-    dither_method: DitherMethod = 'atkinson',
+    dither_method: DitherMethod = DitherMethod.atkinson,
     adjust_brightness: float = 1,
     threshold_func: ThresholdFunc | None = None,
     interpolate: bool = True,
@@ -204,7 +176,9 @@ def rasterize(
     ).log(
         f'sample rate in pixels: {sx:.2f} horizontal, {sy:.2f} vertical'
     )
-    image = sharpen(image.convert('L'), edging, cw)
+    image = sharpen(image, edging, cw)
+    if image.mode != 'L':
+        image = image.convert('L')
     max_row = round(image.height * zoom / ch) if not crop_y else min(
         round(image.height * zoom / ch), r
     )
@@ -233,17 +207,17 @@ def rasterize(
                     max_col * 2 * (cy * 4 + dy) + cx * 2 + dx
                 ]
                 for dx, dy in (
-                    (0, 0), (0, 1), (0, 2), (1, 0),
-                    (1, 1), (1, 2), (0, 3), (1, 3),
+                    (0, 0), (1, 0),
+                    (0, 1), (1, 1),
+                    (0, 2), (1, 2),
+                    (0, 3), (1, 3),
                 )
             ]
-            row.append(
-                unicodedata.lookup(char_name(registers, inverted=inverted))
-            )
+            row.append(braille(registers, inverted=inverted))
         yield ''.join(row)
 
 
-def scale_image(
+def get_zoom_factor(
     image: Image.Image, zoom_factor: float,
     rcwh_func: Callable[
         [], tuple[int, int, int, int]
@@ -262,6 +236,18 @@ def load_image_file(filename: str) -> Image.Image:
     return Image.open(pathlib.Path(filename)).copy()
 
 
+def plot_image_histogram(
+    image: Image.Image, options: argparse.Namespace
+) -> int:
+    if image.mode != 'L':
+        image = image.convert('L')
+    for line in plot_brightness_and_threshold(image, options):
+        print(line)
+    if options.debug:
+        Debug.show(sys.stderr)
+    return 0
+
+
 def main(
     argv: list[str] = sys.argv[1:],
     load_image_file_func: Callable[
@@ -278,9 +264,11 @@ def main(
         sys.exit(1)
     image = load_image_file_func(options.inputfile)
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
+    if options.histogram:
+        return plot_image_histogram(image, options)
     rows = list(rasterize(
         image,
-        zoom=scale_image(image, options.zoom_factor),
+        zoom=get_zoom_factor(image, options.zoom_factor),
         inverted=options.invert,
         interpolate=not options.disable_antialiasing,
         crop_y=options.crop_y,

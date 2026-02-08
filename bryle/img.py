@@ -1,30 +1,15 @@
 import argparse
-from typing import Callable
+from collections import defaultdict
+from typing import Callable, Iterable
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageChops, ImageFilter
 
 from .util import Debug
+from .stat import boxplot, percentile, plot
 
 
 type ThresholdFunc = Callable[[tuple[float, float]], float]
 type ThresholdFuncFactory = Callable[[Image.Image, int], ThresholdFunc]
-
-
-def percentile(histogram: list[int], percent: int = 50) -> int:
-    '''
-    >>> percentile([0, 3, 2, 1], 50)
-    1
-
-    >>> percentile([0, 3, 2, 1], 66)
-    2
-    '''
-    target = sum(histogram) * percent / 100
-    acc = 0
-    for i, count in enumerate(histogram):
-        if (acc := acc + count) >= target:
-            break
-    Debug.log(f'{percent}th percentile at brightness level {i}')
-    return i
 
 
 def thr_percentile_factory(
@@ -67,15 +52,10 @@ def thr_local_avg_factory(
     blur_radius = blur_radius or max(
         12, min(image.width, image.height) // 16
     )
-    averaged = image.filter(
-        ImageFilter.GaussianBlur(blur_radius)
-    ).convert('L')
     Debug.log(f'gaussian blur radius for `local` mode: {blur_radius}')
-    Debug.log(
-        'min/max threshold values used in `local` mode: '
-        f'{averaged.getextrema()}'
-    )
-    pixels = averaged.get_flattened_data()
+    pixels = image.filter(
+        ImageFilter.GaussianBlur(blur_radius)
+    ).convert('L').get_flattened_data()
     return threshold
 
 
@@ -98,11 +78,44 @@ def get_threshold_func(
     )
 
 
-DITHER_ERROR_RECIPIENTS = {
-    'atkinson': [
-        (1, 0, 2), (2, 0, 2), (-1, 1, 2), (0, 1, 2), (1, 1, 2), (0, 2, 2),
-    ],
-    'floyd-steinberg': [
-        (1, 0, 7), (-1, 1, 3), (0, 1, 5), (1, 1, 1),
-    ],
-}
+def sharpen(
+    image: Image.Image, factor: int, blur_radius: float
+) -> Image.Image:
+    if factor < 1:
+        return image
+    smot = image.filter(ImageFilter.GaussianBlur(blur_radius))
+    for chops, images in (
+        (ImageChops.add, (image, smot)), (ImageChops.subtract, (smot, image))
+    ):
+        image = chops(
+            image, ImageChops.subtract(*images).point(
+                lambda p: p * factor
+            )
+        )
+    Debug.log(f'edge emphasis by factor {factor}')
+    return image
+
+
+def find_thresholds(
+    image: Image.Image, options: argparse.Namespace,
+) -> list[int]:
+    func = get_threshold_func(image, options)
+    adjust_brightness = 100 / options.brightness
+    frequencies: dict[int, int] = defaultdict(int)
+    for py in range(0, image.height, 16):
+        for px in range(0, image.width, 16):
+            threshold = func((px, py)) * adjust_brightness
+            frequencies[round(threshold)] += 1
+    return [
+        frequencies[i] for i in range(256)
+    ]
+
+
+def plot_brightness_and_threshold(
+    image: Image.Image, options: argparse.Namespace,
+    cols: int = 80, rows: int = 8,
+) -> Iterable[str]:
+    histogram = image.histogram()
+    yield from plot(histogram, c=cols, r=rows, fns=True)
+    thresholds = find_thresholds(image, options)
+    yield boxplot(thresholds, c=cols)

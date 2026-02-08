@@ -9,14 +9,14 @@ import tempfile
 import pytest
 
 from bryle import (
-    DitherMethod,
     main,
     sample_func,
-    scale_image,
+    get_zoom_factor,
+    plot_image_histogram,
     rasterize,
     terminal_rcwh,
 )
-from bryle.args import parse_args
+from bryle.args import DitherMethod, parse_args
 
 
 @pytest.mark.parametrize(
@@ -41,6 +41,7 @@ from bryle.args import parse_args
         ('--floyd -Datkinson f.png', True),
         ('-Dfloyd f.png', True),
         ('--fl f.png', False),
+        ('-b0 f.png', True),
     )
 )
 def test_parse_args(argv: str, error: bool) -> None:
@@ -232,11 +233,6 @@ def test_stdin_input_inappropriate_ioctl_for_device(
         assert terminal_rcwh(sys.stdin, sys.stdout)
 
 
-@pytest.fixture(scope='session')
-def image() -> Image.Image:
-    return Image.open('eppels.png')
-
-
 @pytest.mark.parametrize(
     'method, patterns, expected', (
         ('atkinson', ['⠳', '⢷'], True),
@@ -282,12 +278,25 @@ def test_fit_to_window(image: Image.Image) -> None:
     lines = [
         line for line in rasterize(
             image, crop_y=True, rcwh_func=rcwh_func,
-            zoom=scale_image(image, 0, rcwh_func=rcwh_func),
+            zoom=get_zoom_factor(image, 0, rcwh_func=rcwh_func),
             interpolate=False,
         )
     ]
     assert len(lines) == 11
     assert len(lines[0]) == 44
+
+
+def test_histogram(
+    image: Image.Image,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    options = parse_args('-Hd f.tif -t20'.split())  # noqa: SIM905
+    plot_image_histogram(image, options)
+    capture = capsys.readouterr()
+    stdout = capture.out
+    assert '─┾━━━━━━━━━━━━━━━━━━╋━━┽─' in stdout
+    assert '─┾━━━━━━━━╋━━━━┽─' in stdout, f'{stdout}'
+    assert 'gaussian blur radius for `local` mode: 20' in capture.err
 
 
 @pytest.mark.parametrize(

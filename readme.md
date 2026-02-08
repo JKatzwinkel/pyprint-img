@@ -8,8 +8,8 @@ converts image files into monochrome unicode text utilizing the braille charset.
 ## usage
 
 ```help
-usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-d] [-y] [-z FACTOR | -x] [-v] [-a]
-            [-A] [-b LEVEL] [-e [FACTOR]] [-D METH | --floyd] [-t NUM]
+usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-H] [-d] [-y] [-z FACTOR | -x] [-v]
+            [-a] [-A] [-b LEVEL] [-e [FACTOR]] [-D METH | --floyd] [-t NUM]
             FILE
 
 rasterize an image into the terminal.
@@ -25,8 +25,6 @@ options:
   -o, --output FILE     output file (default: /dev/stdout).
   -f, --force           overwrite existing output file (default: True for
                         /dev/stdout).
-  -d, --debug           preceed normal output with debug log printed to
-                        /dev/stderr.
   -y, --crop-y          crop image to terminal height.
   -v, --invert          invert 'pixel' values of output.
   -a, --sharpen         enhance input image by emphasizing edges a little (the
@@ -39,6 +37,11 @@ options:
                         --threshold option). required if selected threshold
                         mode is "percentile" or "const". threshold mode
                         "local" allows values between 0 and 9999.
+
+debug options:
+  -H, --histogram       plot image histogram to stdout.
+  -d, --debug           preceed normal output with debug log printed to
+                        /dev/stderr.
 
 resizing options:
   -z, --zoom FACTOR     factor by which input image should be scaled in size.
@@ -187,14 +190,14 @@ python p.py eppels.png -t 5 -aaa
 ```
 
 ```output
-⠲⣶⣶⣶⣶⣶⣶⡶⠶⠶⠶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶
-⢺⣷⣯⣽⣿⣿⠋⢀⣑⣄⣠⡄⢻⣿⣧⣾⣿⣿⡝⡟⡿⢙
-⢹⣿⣿⣿⠿⠿⢀⣈⣻⣽⠿⢃⡸⠿⠿⠿⣿⣿⣯⢟⣾⡱
-⣽⣿⣟⢀⠀⠀⠈⠛⠆⠀⣠⠁⢰⣿⣗⡁⢀⢩⠻⣿⣷⣿
-⣚⣿⣿⣿⣿⣶⣶⡶⠒⠋⠁⠄⠀⠙⠙⠿⣿⠿⠀⣿⣿⡿
-⢈⣨⣽⡾⣿⣿⣣⡀⠀⠀⠀⠎⠺⣄⠀⠀⠈⠀⣰⣿⣿⠺
-⢚⣞⣪⣿⣿⣿⣿⣮⣦⣄⣀⣀⣀⣈⣠⣴⣶⣿⣿⡿⣦⢶
-⡿⠿⠛⠛⠻⠿⠛⠻⢿⣿⣿⣿⣿⣿⡿⡿⢿⣯⣻⣗⣽⣾
+⢶⣶⣶⣶⣶⣶⣶⡶⠶⠶⠶⣶⣾⣶⣶⣶⣶⣶⣶⣶⣶⣶
+⢺⣷⣯⣼⣿⣿⠋⢠⣕⣄⣠⡄⢻⣿⣧⣿⣿⣿⡝⣟⡿⢙
+⢸⣿⣿⣿⠿⠿⢀⣈⣻⣽⠿⢃⡸⠿⠿⠿⣿⣿⣯⢿⣾⣡
+⣼⣿⣟⢀⠀⠀⠈⠛⠆⠀⣠⠁⢴⣿⣗⡁⢀⢩⠻⣿⣿⣿
+⢺⣿⣿⣿⣿⣶⣶⡶⠒⠋⠁⠄⠀⠙⠙⠿⣿⠿⠀⣿⣿⣿
+⢈⣈⣽⣟⣿⣿⣣⡀⠀⠀⠀⠎⠺⣄⠀⠀⠈⠂⣰⣿⣿⠸
+⢸⣟⣮⣿⣿⣿⣿⣮⣦⣄⣀⣀⣀⣈⣠⣴⣶⣿⣿⡿⣦⣖
+⡿⠿⠛⠛⠻⠿⠛⠻⢿⣿⣿⣿⣿⣿⡿⡿⢿⣯⣏⣇⣽⣾
 ```
 
 enable debug messages to `/dev/stderr` with the `-d`/`--debug` flag.
@@ -208,7 +211,6 @@ image dimensions: 202×151
 got fixed term size from TERM_RCWH env var: 5×20
 resize image to 89.1%
 gaussian blur radius for `local` mode: 12
-min/max threshold values used in `local` mode: (50, 202)
 got fixed term size from TERM_RCWH env var: 5×20
 xterm window dimensions: 180×95 pixels, 20×5 characters
 character size in pixels: 9.00×19.00
@@ -238,7 +240,6 @@ image dimensions: 720×1280
 got fixed term size from TERM_RCWH env var: 20×79
 resize image to 98.8%
 gaussian blur radius for `local` mode: 45
-min/max threshold values used in `local` mode: (21, 206)
 got fixed term size from TERM_RCWH env var: 20×79
 xterm window dimensions: 711×380 pixels, 79×20 characters
 character size in pixels: 9.00×19.00
@@ -302,7 +303,9 @@ python p.py eppels.png -z 2
 ```
 
 the radius affecting the brightness threshold used at any given pixel can be
-overwritten with the `-t`/`--threshold-arg` option.
+overwritten with the `-t`/`--threshold-arg` option. Option `-b/--brightness`
+allows to adjust the respective threshold values before sampling. Use the
+`-H/--histogram` flag to show the effects.
 
 ```bash
 python p.py eppels.png -z 2 -m local -t 14
@@ -327,6 +330,25 @@ python p.py eppels.png -z 2 -m local -t 14
 ⠿⠛⠉⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠀⠉⠙⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠿⢿⡆⠻⣿⣿⣿⠟
 ```
 
+```bash
+python p.py eppels.png -mlocal -t20 -b140 -H
+```
+
+```output
+───────────────────────────┾━━━━━━━━━━━━━━━━━━╋━━┽───────       
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⢰⣼⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣧⣼⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣴⣿⣦⣤⣤⣄⣠⣠⣄⣀⢀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⢀⣀⣀⣀⠀⣀⣀⡀⡀⠀⠀⢠⣴⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+🭽▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔🭽▔▔▔▔▔▔▔▔▔▔🭽▔▔▔▔▔▔
+             ─────────┾━━━━━━╋━━┽───
+```
+
+---
 
 the `median` mode on the other hand uses the median brightness across the entire
 image as its threshold, without adjusting for overall darker or lighter areas.
@@ -353,6 +375,8 @@ python p.py --threshold median -z 2 eppels.png
 ⣿⣿⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⠟⠛⠉⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠀⠈⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
+
+---
 
 the `percentile` mode is a generalized version of this and accepts a parameter
 specifying which percentile of the brightness distribution should be used as
@@ -381,6 +405,8 @@ python p.py --threshold percentile -t 35 -z 2 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
 
+---
+
 the `extrema` mode just calculates the threshold right between the darkest and
 the lightest pixel values, without regard for their respective frequency.
 
@@ -406,6 +432,8 @@ python p.py -m extrema -z 2 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
+
+---
 
 finally, it is possible to just pass the literal threshold value straight up
 into the thing using `-t`/`--threshold-arg` in the `const` mode:
