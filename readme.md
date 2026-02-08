@@ -267,15 +267,15 @@ using 79 columns × 20 rows
 ⣾⠙⡾⣽⣻⢾⣽⣻⡞⠿⣳⣈⢀⢀⣑⣠⢎⠖⠃⢌⣿⡟⢡⣯⣶⣿⣿⣒⣿⣿⣿⣿⣿⡄⣿⡆⢂⢳⡬⠢⠇⠐⢤⢰⣻⣿⣾⢷⣻⣞⣷⣻⢮⣟⡵⣯⣏⡷⣭⢗⣯⠾⣝⡾⣭⣏⢷⣛⣮⢷⣫⢾⡽⣺⣭⢟⣼⢫⣞
 ```
 
-### threshold modes
+### threshold settings
 
 option `-m`/`--threshold` allows for switching between different threshold value
 functions. some of those can be parametrized with the option
 `-t`/`--threshold-arg`.
 
-the default mode is `local` and takes the average brightness within some radius
-into account when sampling a pixel and deciding whether its value exceeds the
-required threshold.
+the default setting is `local` and takes the average brightness within some
+radius into account when sampling a pixel and deciding whether its value exceeds
+the required threshold.
 
 ```bash
 python p.py eppels.png -z 2
@@ -350,7 +350,7 @@ python p.py eppels.png -mlocal -t20 -b140 -H
 
 ---
 
-the `median` mode on the other hand uses the median brightness across the entire
+the `median` setting on the other hand uses the median brightness across the entire
 image as its threshold, without adjusting for overall darker or lighter areas.
 
 ```bash
@@ -399,7 +399,7 @@ python p.py -mmedian -H eppels.png
 
 ---
 
-the `percentile` mode is a generalized version of this and accepts a parameter
+the `percentile` setting is a generalized version of this and accepts a parameter
 specifying which percentile of the brightness distribution should be used as
 threshold. So passing `-m percentile -t 50` would be equivalent to `-m median`.
 
@@ -449,7 +449,7 @@ python p.py --threshold percentile -t 35 -H eppels.png
 
 ---
 
-the `extrema` mode just calculates the threshold right between the darkest and
+the `extrema` setting just calculates the threshold right between the darkest and
 the lightest pixel values, without regard for their respective frequency.
 
 ```bash
@@ -500,7 +500,7 @@ python p.py -mextrema -H eppels.png
 ---
 
 finally, it is possible to just pass the literal threshold value straight up
-into the thing using `-t`/`--threshold-arg` in the `const` mode:
+into the thing using `-t`/`--threshold-arg` with the `const` setting:
 
 ```bash
 python p.py -m const -z 2 -t 160 eppels.png
