@@ -44,6 +44,14 @@ def minmedmax(histogram: list[int]) -> list[int]:
     )
 
 
+def five_number_summary(histogram: list[int]) -> list[int]:
+    return sorted(
+        minmedmax(histogram) + [
+            percentile(histogram, p) for p in (25, 75)
+        ]
+    )
+
+
 def shrink(
     histogram: list[int],
     max_width: int,
@@ -111,25 +119,26 @@ def plot(histogram: list[int], c: int = 80, r: int = 10) -> Iterable[str]:
     yield ''.join(line)
 
 
-def errbar(histogram: list[int], c: int = 80) -> str:
+def boxplot(histogram: list[int], c: int = 80) -> str:
     '''
     >>> bins = [0, 0, 0, 2, 1, 4, 6, 5, 4, 3, 2, 1, 0, 1, 0, 0]
-    >>> errbar(bins)
-    '   ┝━━━╋━━━━━┥'
+    >>> boxplot(bins)
+    '   ───┾╋┽─────'
 
-    >>> errbar([0, 0, 0, 0, 10, 0, 0, 0])
+    >>> boxplot([0, 0, 0, 0, 10, 0, 0, 0])
     '    ╋'
 
-    >>> errbar([0, 0, 0, 5, 5, 0, 0, 0])
-    '   ┝┥'
+    >>> boxplot([0, 0, 0, 5, 5, 0, 0, 0])
+    '   ╋┽'
     '''
-    histogram = shrink(histogram, c * 2)
-    markers = minmedmax(histogram)
+    histogram = shrink(histogram, c)
+    markers = five_number_summary(histogram)
     line = [' '] * len(histogram)
-    for i in range(markers[0], markers[2]):
+    for i in range(markers[0], markers[4] + 1):
+        line[i] = '─'
+    for i in range(markers[1], markers[3] + 1):
         line[i] = '━'
-    line[markers[1]] = '╋'
-    if len(set(markers)) > 1:
-        line[markers[0]] = '┝'
-        line[markers[2]] = '┥'
+    line[markers[1]] = '┾'
+    line[markers[3]] = '┽'
+    line[markers[2]] = '╋'
     return ''.join(line).rstrip()

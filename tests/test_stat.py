@@ -2,7 +2,7 @@ from PIL import Image
 
 import pytest
 
-from bryle.stat import errbar, extrema, plot
+from bryle.stat import boxplot, extrema, plot
 
 
 def test_extrema(image: Image.Image) -> None:
@@ -13,7 +13,7 @@ def test_extrema(image: Image.Image) -> None:
     'bins, bar', (
         (
             [1,  1, 1, 1],
-            '┝╋━┥',
+            '┾╋┽─',
         ),
         (
             [0,  0, 0, 4, 0, 0, 0, 0],
@@ -21,13 +21,13 @@ def test_extrema(image: Image.Image) -> None:
         ),
         (
             [0,  0, 0, 4, 5, 0, 0, 0],
-            '   ┝┥',
+            '   ┾╋',
         ),
         (
             [1,  0, 0, 2, 5, 0, 1, 0],
-            '┝━━━╋━┥',
+            '───┾╋──',
         ),
     )
 )
-def test_errorbars(bins: list[int], bar: str) -> None:
-    assert errbar(bins) == bar
+def test_boxplots(bins: list[int], bar: str) -> None:
+    assert boxplot(bins) == bar, '\n'.join(plot(bins))
