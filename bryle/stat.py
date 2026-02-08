@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from .chars import braille
+from .chars import PairCharset, pair2char
 from .util import Debug
 
 
@@ -75,39 +75,46 @@ def shrink(
 
 
 def plot(
-     histogram: list[int], c: int = 80, r: int = 10, fns: bool = False,
+     histogram: list[int], c: int = 80, r: int = 10,
+     fns: bool = False, charset: PairCharset = 'braille',
 ) -> Iterable[str]:
     '''
+    >>> for line in plot([0, 1, 2, 3, 4, 3], r=2):
+    ...     print(line)
+    ⠀⢠⣧
+    ⢠⣿⣿
+    ▔🭽🭽
+
     >>> bins = [0, 0, 0, 2, 1, 4, 6, 5, 4, 3, 2, 1, 0, 1, 0, 0]
     >>> for line in plot(bins, r=3):
     ...     print(line)
-    ⠀⠀⠀⣆⠀⠀⠀⠀
-    ⠀⠀⢰⣿⣆⠀⠀⠀
-    ⠀⢰⣸⣿⣿⣆⢀⠀
+    ⠀⠀⠀⣧⠀⠀⠀⠀
+    ⠀⠀⢸⣿⣧⠀⠀⠀
+    ⠀⢸⣼⣿⣿⣧⢠⠀
     ▔▔🭽▔🭽▔▔🭽
 
+    >>> for line in plot(bins, r=3, charset='8ths'):
+    ...     line
+    '   ▙    '
+    '  ▐█▙   '
+    ' ▐▟██▙▗ '
+    '▔▔🭽▔🭽▔▔🭽'
     '''
     histogram = shrink(histogram, c * 2)
     if fns:
         yield boxplot(histogram, c)
     max_frequency = max(histogram)
     bin_height = [
-        r * b / max_frequency * 4 for b in histogram
+        r * b / max_frequency for b in histogram
     ]
     line = []
     for j in range(r):
-        y = (r - j) * 4
+        y = (r - j)
         for i in range(0, len(histogram) - 1, 2):
-            dots = [
-                bin_height[i + dx] > y - dy
-                for dx, dy in (
-                    (0, 0), (1, 0),
-                    (0, 1), (1, 1),
-                    (0, 2), (1, 2),
-                    (0, 3), (1, 3),
-                )
-            ]
-            line.append(braille(dots))
+            left, right = (
+                bin_height[i + dx] - y + 1 for dx in range(2)
+            )
+            line.append(pair2char(left, right, charset=charset))
         yield ''.join(line)
         line.clear()
     markers = minmedmax(histogram)

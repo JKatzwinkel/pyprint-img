@@ -116,6 +116,8 @@ def plot_brightness_and_threshold(
     cols: int = 80, rows: int = 8,
 ) -> Iterable[str]:
     histogram = image.histogram()
-    yield from plot(histogram, c=cols, r=rows, fns=True)
+    yield from plot(
+        histogram, c=cols, r=rows, fns=True, charset='blocks',
+    )
     thresholds = find_thresholds(image, options)
     yield boxplot(thresholds, c=cols)
