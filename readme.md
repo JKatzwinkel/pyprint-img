@@ -335,7 +335,7 @@ python p.py eppels.png -mlocal -t20 -b140 -H
 ```
 
 ```output
-───────────────────────────┾━━━━━━━━━━━━━━━━━━╋━━┽───────       
+───────────────────────────┾━━━━━━━━━━━━━━━━━━╋━━┽───────
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -376,6 +376,16 @@ python p.py --threshold median -z 2 eppels.png
 ⠟⠛⠉⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠀⠈⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
 
+<details><summary>median threshold histogram</summary>
+            
+```bash
+python p.py -mmedian -H eppels.png
+```
+
+```output
+```
+</details>
+
 ---
 
 the `percentile` mode is a generalized version of this and accepts a parameter
@@ -405,6 +415,16 @@ python p.py --threshold percentile -t 35 -z 2 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
 
+<details><summary>percentile threshold histogram</summary>
+ 
+```bash
+python p.py --threshold percentile -t 35 -H eppels.png
+```
+
+```output
+```
+</details>
+
 ---
 
 the `extrema` mode just calculates the threshold right between the darkest and
@@ -433,6 +453,17 @@ python p.py -m extrema -z 2 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
 
+<details><summary>extrema threshold histogram</summary>
+
+```bash
+python p.py -mextrema -H eppels.png
+```
+
+```output
+```
+
+</details>
+
 ---
 
 finally, it is possible to just pass the literal threshold value straight up
@@ -460,6 +491,19 @@ python p.py -m const -z 2 -t 160 eppels.png
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ```
+
+<details><summary>const threshold histogram</summary>
+
+```bash
+python p.py -mconst -H eppels.png
+```
+
+```output
+```
+
+</details>
+
+
 
 
 ### dithering
