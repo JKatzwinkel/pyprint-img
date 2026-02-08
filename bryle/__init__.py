@@ -185,7 +185,9 @@ def rasterize(
     ).log(
         f'sample rate in pixels: {sx:.2f} horizontal, {sy:.2f} vertical'
     )
-    image = sharpen(image.convert('L'), edging, cw)
+    image = sharpen(image, edging, cw)
+    if image.mode != 'L':
+        image = image.convert('L')
     max_row = round(image.height * zoom / ch) if not crop_y else min(
         round(image.height * zoom / ch), r
     )

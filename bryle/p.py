@@ -4,27 +4,11 @@ from typing import Callable
 from PIL import Image, ImageFilter
 
 from .util import Debug
+from .stat import percentile
 
 
 type ThresholdFunc = Callable[[tuple[float, float]], float]
 type ThresholdFuncFactory = Callable[[Image.Image, int], ThresholdFunc]
-
-
-def percentile(histogram: list[int], percent: int = 50) -> int:
-    '''
-    >>> percentile([0, 3, 2, 1], 50)
-    1
-
-    >>> percentile([0, 3, 2, 1], 66)
-    2
-    '''
-    target = sum(histogram) * percent / 100
-    acc = 0
-    for i, count in enumerate(histogram):
-        if (acc := acc + count) >= target:
-            break
-    Debug.log(f'{percent}th percentile at brightness level {i}')
-    return i
 
 
 def thr_percentile_factory(
@@ -67,15 +51,10 @@ def thr_local_avg_factory(
     blur_radius = blur_radius or max(
         12, min(image.width, image.height) // 16
     )
-    averaged = image.filter(
-        ImageFilter.GaussianBlur(blur_radius)
-    ).convert('L')
     Debug.log(f'gaussian blur radius for `local` mode: {blur_radius}')
-    Debug.log(
-        'min/max threshold values used in `local` mode: '
-        f'{averaged.getextrema()}'
-    )
-    pixels = averaged.get_flattened_data()
+    pixels = image.filter(
+        ImageFilter.GaussianBlur(blur_radius)
+    ).convert('L').get_flattened_data()
     return threshold
 
 
