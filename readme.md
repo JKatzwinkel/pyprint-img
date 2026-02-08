@@ -124,14 +124,14 @@ python p.py eppels.png -e.5 -v
 ```
 
 ```output
-⣎⢷⡲⢶⢶⣶⣶⡶⠶⠶⠶⢾⣳⣟⡶⣶⢶⡶⣶⢶⡶⣶
-⣎⢷⡹⣯⣞⣿⠃⢠⡑⣄⣠⢆⢻⣞⣷⣫⢯⣽⡳⣏⡿⣵
-⢮⢷⣻⠷⠻⠟⢠⢀⠹⡘⠞⣄⡺⠿⠷⠯⣿⡾⣽⡽⣞⣳
-⢯⣻⣭⢀⠀⠀⠀⠉⠆⢁⣰⠀⠰⣟⣣⢁⡠⣝⡳⣿⣽⣳
-⣏⠷⣯⣟⡾⣶⣶⠶⠒⠋⡅⢂⠀⠱⢈⠟⣻⠻⣐⡿⣞⣳
-⣞⡽⣖⢯⣽⣻⡥⡂⠀⠡⠐⡈⠒⡀⠀⠈⠀⢃⣴⡿⣽⣳
-⢾⣱⢯⣛⡶⣯⢷⣯⢦⣄⣀⣀⣀⣀⣡⣶⣶⢿⣯⢟⡷⣽
-⡻⢞⣫⠻⡽⢏⡟⠾⣯⣟⣾⣳⡟⣯⡟⣾⣹⢷⣫⠿⣽⣞
+⠱⡈⢍⡉⡉⠉⠉⢉⣉⣉⣉⡁⠌⠠⢉⠉⡉⢉⠉⡉⢉⠉
+⠱⡈⢆⠐⠡⠀⣼⡟⢮⠻⠟⡹⡄⠡⠈⠔⡐⠂⢌⠰⢀⠊
+⡑⡈⠄⣈⣄⣠⡟⡿⣆⢧⣡⠻⢅⣀⣈⣐⠀⢁⠂⢂⠡⠌
+⡐⠄⠒⡿⣿⣿⣿⣶⣹⡾⠏⣿⣏⠠⠜⡾⢟⠢⢌⠀⠂⠌
+⠰⣈⠐⠠⢁⠉⠉⣉⣭⣴⢺⡽⣿⣎⡷⣠⠄⣄⠯⢀⠡⠌
+⠡⢂⠩⡐⠂⠄⢚⢽⣿⣞⣯⢷⣭⢿⣿⣷⣿⡼⠋⢀⠂⠌
+⡁⠎⡐⠤⢉⠐⡈⠐⡙⠻⠿⠿⠿⠿⠞⠉⠉⡀⠐⡠⢈⠂
+⢄⡡⠔⣄⢂⡰⢠⣁⠐⠠⠁⠌⢠⠐⢠⠁⠆⡈⠔⣀⠂⠡
 ```
 
 scale input image by factor `2` first and raise threshold forgivingness by 1%:
@@ -187,14 +187,14 @@ python p.py eppels.png -t 5 -aaa
 ```
 
 ```output
-⠲⣶⣶⣶⣶⣶⣶⡶⠶⠶⠶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶
-⢺⣷⣯⣽⣿⣿⠋⢀⣑⣄⣠⡄⢻⣿⣧⣾⣿⣿⡝⡟⡿⢙
-⢹⣿⣿⣿⠿⠿⢀⣈⣻⣽⠿⢃⡸⠿⠿⠿⣿⣿⣯⢟⣾⡱
-⣽⣿⣟⢀⠀⠀⠈⠛⠆⠀⣠⠁⢰⣿⣗⡁⢀⢩⠻⣿⣷⣿
-⣚⣿⣿⣿⣿⣶⣶⡶⠒⠋⠁⠄⠀⠙⠙⠿⣿⠿⠀⣿⣿⡿
-⢈⣨⣽⡾⣿⣿⣣⡀⠀⠀⠀⠎⠺⣄⠀⠀⠈⠀⣰⣿⣿⠺
-⢚⣞⣪⣿⣿⣿⣿⣮⣦⣄⣀⣀⣀⣈⣠⣴⣶⣿⣿⡿⣦⢶
-⡿⠿⠛⠛⠻⠿⠛⠻⢿⣿⣿⣿⣿⣿⡿⡿⢿⣯⣻⣗⣽⣾
+⢶⣶⣶⣶⣶⣶⣶⡶⠶⠶⠶⣶⣾⣶⣶⣶⣶⣶⣶⣶⣶⣶
+⢺⣷⣯⣼⣿⣿⠋⢠⣕⣄⣠⡄⢻⣿⣧⣿⣿⣿⡝⣟⡿⢙
+⢸⣿⣿⣿⠿⠿⢀⣈⣻⣽⠿⢃⡸⠿⠿⠿⣿⣿⣯⢿⣾⣡
+⣼⣿⣟⢀⠀⠀⠈⠛⠆⠀⣠⠁⢴⣿⣗⡁⢀⢩⠻⣿⣿⣿
+⢺⣿⣿⣿⣿⣶⣶⡶⠒⠋⠁⠄⠀⠙⠙⠿⣿⠿⠀⣿⣿⣿
+⢈⣈⣽⣟⣿⣿⣣⡀⠀⠀⠀⠎⠺⣄⠀⠀⠈⠂⣰⣿⣿⠸
+⢸⣟⣮⣿⣿⣿⣿⣮⣦⣄⣀⣀⣀⣈⣠⣴⣶⣿⣿⡿⣦⣖
+⡿⠿⠛⠛⠻⠿⠛⠻⢿⣿⣿⣿⣿⣿⡿⡿⢿⣯⣏⣇⣽⣾
 ```
 
 enable debug messages to `/dev/stderr` with the `-d`/`--debug` flag.
@@ -208,7 +208,6 @@ image dimensions: 202×151
 got fixed term size from TERM_RCWH env var: 5×20
 resize image to 89.1%
 gaussian blur radius for `local` mode: 12
-min/max threshold values used in `local` mode: (50, 202)
 got fixed term size from TERM_RCWH env var: 5×20
 xterm window dimensions: 180×95 pixels, 20×5 characters
 character size in pixels: 9.00×19.00
@@ -238,7 +237,6 @@ image dimensions: 720×1280
 got fixed term size from TERM_RCWH env var: 20×79
 resize image to 98.8%
 gaussian blur radius for `local` mode: 45
-min/max threshold values used in `local` mode: (21, 206)
 got fixed term size from TERM_RCWH env var: 20×79
 xterm window dimensions: 711×380 pixels, 79×20 characters
 character size in pixels: 9.00×19.00
