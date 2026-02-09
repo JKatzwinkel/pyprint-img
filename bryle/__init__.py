@@ -1,5 +1,6 @@
 import argparse
 import fcntl
+import io
 import os
 import pathlib
 import struct
@@ -231,9 +232,16 @@ def get_zoom_factor(
 
 
 def load_image_file(filename: str) -> Image.Image:
-    if filename == '-':
-        return Image.open(sys.stdin.buffer).copy()
-    return Image.open(pathlib.Path(filename)).copy()
+    if filename != '-':
+        return Image.open(pathlib.Path(filename)).copy()
+    byteinput = sys.stdin.buffer.read()
+    try:
+        return Image.open(
+            byteinput.decode('utf8').strip()
+        ).copy()
+    except Exception:
+        ...
+    return Image.open(io.BytesIO(byteinput)).copy()
 
 
 def plot_image_histogram(

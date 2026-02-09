@@ -100,7 +100,11 @@ python p.py eppels.png
 read from stdin by passing `-` as the file argument:
 
 ```bash
-cat eppels.png | python p.py -
+paste <( \
+echo eppels.png | python p.py - \
+) <(\
+cat eppels.png | python p.py - \
+)
 ```
 
 ```output
@@ -230,7 +234,7 @@ cannot be determined and passing of a fixed terminal size might be necessary:
 
 ```bash
 # set fixed terminal size in rows×cols
-export TERM_RCWH=20x79
+export TERM_RCWH=14x79
 # run braillify with no tty at neither stdin nor stdout
 cat shelly.jpg | python p.py - -dxye.3 2>&1 > >(cat)
 ```
