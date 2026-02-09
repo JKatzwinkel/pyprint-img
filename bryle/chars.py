@@ -101,7 +101,9 @@ EIGHTH_PAIRS = {
 }
 
 
-type PairCharset = Literal['braille', 'eighths', '8ths', 'blocks']
+type PairCharset = Literal[
+    'braille', 'eighths', '8ths', 'blocks', 'ascii',
+]
 
 
 def pair2char(
@@ -142,9 +144,7 @@ def pair2char(
     >>> pair2char(.25, 2, '8ths')
     '▅'
     '''
-    if charset == 'braille':
-        return pair2braille(left, right)
-    return pair2blocks(left, right)
+    return CHAR_FUNC[charset](left, right)
 
 
 def pair2blocks(left: float, right: float) -> str:
@@ -158,3 +158,38 @@ def pair2blocks(left: float, right: float) -> str:
     ))):
         return chr(codepoint)
     return eighthblock((min(1, left) + min(1, right)) / 2)
+
+
+def pair2ascii(left: float, right: float) -> str:
+    '''
+    >>> pair2ascii(0, 0)
+    ' '
+    >>> pair2ascii(-1, -1)
+    ' '
+    >>> pair2ascii(1, 1)
+    '|'
+    >>> pair2ascii(2, 2)
+    '|'
+    >>> pair2ascii(-1, 1.2)
+    '/'
+    >>> print(pair2ascii(.3, .2))
+    \\
+    >>> print(pair2ascii(.5, .3))
+    \\
+    '''
+    if left <= 0 and right <= 0:
+        return ' '
+    if left >= 1 and right >= 1:
+        return '|'
+    if left < right:
+        return '/'
+    return '\\'
+
+
+CHAR_FUNC = {
+    'eighths': pair2blocks,
+    '8ths': pair2blocks,
+    'blocks': pair2blocks,
+    'braille': pair2braille,
+    'ascii': pair2ascii,
+}

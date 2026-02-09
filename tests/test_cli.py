@@ -291,7 +291,7 @@ def test_histogram(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     options = parse_args('-Hd f.tif -t20'.split())  # noqa: SIM905
-    plot_image_histogram(image, options)
+    plot_image_histogram(image, options, charset='blocks')
     capture = capsys.readouterr()
     stdout = capture.out
     assert '─┾━━━━━━━━━━━━━━━━━━╋━━┽─' in stdout

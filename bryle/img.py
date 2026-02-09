@@ -4,8 +4,9 @@ from typing import Callable, Iterable
 
 from PIL import Image, ImageChops, ImageFilter
 
+from .chars import PairCharset
 from .util import Debug
-from .stat import boxplot, percentile, plot
+from .stat import BoxplotCharset, boxplot, percentile, plot
 
 
 type ThresholdFunc = Callable[[tuple[float, float]], float]
@@ -114,10 +115,18 @@ def find_thresholds(
 def plot_brightness_and_threshold(
     image: Image.Image, options: argparse.Namespace,
     cols: int = 80, rows: int = 8,
+    charset: PairCharset = 'ascii',
 ) -> Iterable[str]:
     histogram = image.histogram()
+    boxplotcharset: BoxplotCharset = (
+        'ascii' if charset == 'ascii' else 'utf8'
+    )
     yield from plot(
-        histogram, c=cols, r=rows, fns=True, charset='blocks',
+        histogram, c=cols, r=rows,
+        fns=boxplotcharset,
+        charset=charset,
     )
     thresholds = find_thresholds(image, options)
-    yield boxplot(thresholds, c=cols)
+    yield boxplot(
+        thresholds, c=cols, charset=boxplotcharset,
+    )

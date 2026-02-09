@@ -10,7 +10,7 @@ from typing import Callable, Iterable, TextIO
 from PIL import Image
 
 from .args import DitherMethod, parse_args
-from .chars import braille
+from .chars import PairCharset, braille
 from .img import (
     ThresholdFunc, get_threshold_func,
     plot_brightness_and_threshold,
@@ -237,11 +237,14 @@ def load_image_file(filename: str) -> Image.Image:
 
 
 def plot_image_histogram(
-    image: Image.Image, options: argparse.Namespace
+    image: Image.Image, options: argparse.Namespace,
+    charset: PairCharset = 'ascii',
 ) -> int:
     if image.mode != 'L':
         image = image.convert('L')
-    for line in plot_brightness_and_threshold(image, options):
+    for line in plot_brightness_and_threshold(
+        image, options, charset=charset,
+    ):
         print(line)
     if options.debug:
         Debug.show(sys.stderr)

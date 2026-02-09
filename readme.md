@@ -377,7 +377,7 @@ python p.py --threshold median -z 2 eppels.png
 ```
 
 <details><summary>median threshold histogram</summary>
-            
+
 ```bash
 python p.py -mmedian -H eppels.png
 ```
@@ -427,7 +427,7 @@ python p.py --threshold percentile -t 35 -z 2 eppels.png
 ```
 
 <details><summary>percentile threshold histogram</summary>
- 
+
 ```bash
 python p.py --threshold percentile -t 35 -H eppels.png
 ```
