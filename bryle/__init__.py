@@ -246,12 +246,13 @@ def load_image_file(filename: str) -> Image.Image:
 
 def plot_image_histogram(
     image: Image.Image, options: argparse.Namespace,
-    charset: PairCharset = 'ascii',
+    charset: PairCharset = 'blocks',
 ) -> int:
     if image.mode != 'L':
         image = image.convert('L')
     for line in plot_brightness_and_threshold(
-        image, options, charset=charset,
+        image, options,
+        charset=charset if os.isatty(1) else 'ascii',
     ):
         print(line)
     if options.debug:
