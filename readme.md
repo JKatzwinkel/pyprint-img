@@ -306,7 +306,7 @@ allows to adjust the respective threshold values before sampling. Use the
 `-H/--histogram` flag to show the effects.
 
 ```bash
-python p.py eppels.png -z 2 -m local -t 14
+python p.py eppels.png -z 2 -m local -t 16 -b 110
 ```
 
 ```output
@@ -329,7 +329,7 @@ python p.py eppels.png -z 2 -m local -t 14
 ```
 
 ```bash
-python p.py eppels.png -mlocal -t20 -b140 -H
+python p.py eppels.png -z 2 -m local -t 16 -b 110 -H
 ```
 
 ```output
@@ -526,7 +526,7 @@ python p.py -m const -z 2 -t 160 eppels.png
 <details><summary>const threshold histogram</summary>
 
 ```bash
-python p.py -mconst -H eppels.png
+python p.py -mconst -H eppels.png -t160
 ```
 
 ```output
