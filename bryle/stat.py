@@ -1,11 +1,13 @@
 from typing import Iterable, Literal
 
 from .chars import PairCharset, pair2char
-from .util import Debug
 
 
 def percentile(histogram: list[int], percent: int = 50) -> int:
     '''
+    >>> percentile([1, 1, 1, 1], 50)
+    1
+
     >>> percentile([0, 3, 2, 1], 50)
     1
 
@@ -17,7 +19,6 @@ def percentile(histogram: list[int], percent: int = 50) -> int:
     for i, count in enumerate(histogram):
         if (acc := acc + count) >= target:
             break
-    Debug.log(f'{percent}th percentile at brightness level {i}')
     return i
 
 
@@ -36,6 +37,19 @@ def extrema(histogram: list[int]) -> tuple[int, int]:
         if histogram[j]:
             break
     return (i, j)
+
+
+def mean(histogram: list[int]) -> int:
+    '''
+    >>> mean([1, 1, 1, 1])
+    1
+
+    >>> mean([1] * 8)
+    3
+    '''
+    return sum(
+        i * x for i, x in enumerate(histogram)
+    ) // sum(histogram)
 
 
 def minmedmax(histogram: list[int]) -> list[int]:

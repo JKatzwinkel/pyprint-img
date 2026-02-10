@@ -17,6 +17,7 @@ def thr_percentile_factory(
     image: Image.Image, percent: int = 50,
 ) -> ThresholdFunc:
     threshold = percentile(image.convert('L').histogram(), percent)
+    Debug.log(f'{percent}th percentile at brightness level {threshold}')
     return lambda pixel: threshold
 
 
