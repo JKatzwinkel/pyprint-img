@@ -251,8 +251,7 @@ def plot_image_histogram(
     if image.mode != 'L':
         image = image.convert('L')
     for line in plot_brightness_and_threshold(
-        image, options,
-        charset=charset if os.isatty(1) else 'ascii',
+        image, options, charset=charset,
     ):
         print(line)
     if options.debug:
@@ -277,7 +276,10 @@ def main(
     image = load_image_file_func(options.inputfile)
     Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
     if options.histogram:
-        return plot_image_histogram(image, options)
+        return plot_image_histogram(
+            image, options,
+            charset='blocks' if os.isatty(1) else 'ascii',
+        )
     rows = list(rasterize(
         image,
         zoom=get_zoom_factor(image, options.zoom_factor),
