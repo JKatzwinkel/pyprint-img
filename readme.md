@@ -120,9 +120,15 @@ cat eppels.png | python p.py - \
 
 this is useful for integrating with other command-line tools:
 
-```shell
-curl -s https://example.com/image.png | python p.py -
+```bash
+# enable 10% dithering && invert output
+curl -s https://www.python.org/static/community_logos/python-logo-master-v3-TM.png \
+  | python p.py - -ve.1
 ```
+
+```output
+```
+
 
 enable dithering but invert color values:
 
