@@ -228,6 +228,7 @@ TERM_RCWH=5x20 python p.py eppels.png -dxy 2>&1
 ```
 
 ```output
+input file: eppels.png
 image dimensions: 202×151
 got fixed term size from TERM_RCWH env var: 5×20
 resize image to 89.1%
