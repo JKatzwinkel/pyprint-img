@@ -233,12 +233,15 @@ def get_zoom_factor(
 
 def load_image_file(filename: str) -> Image.Image:
     if filename != '-':
+        Debug.log(f'input file: {filename}')
         return Image.open(pathlib.Path(filename)).copy()
     byteinput = sys.stdin.buffer.read()
     try:
-        return Image.open(
-            byteinput.decode('utf8').strip()
+        result = Image.open(
+            filename := byteinput.decode('utf8').strip()
         ).copy()
+        Debug.log(f'input file: {filename}')
+        return result
     except Exception:
         ...
     return Image.open(io.BytesIO(byteinput)).copy()
