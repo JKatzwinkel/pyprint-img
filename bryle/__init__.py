@@ -138,7 +138,7 @@ def sample_func(
     return sample
 
 
-def rasterize(
+def rasterize(  # noqa: C901
     image: Image.Image,
     zoom: float = 1,
     inverted: bool = False,
@@ -186,20 +186,23 @@ def rasterize(
     max_col = min(round(image.width * zoom / cw), c)
     Debug.log(f'using {max_col} columns × {max_row} rows')
     sample = sample_func(image, sx, sy, interpolate=interpolate)
-    grid: list[list[float]] = [
-        [sample(x, y) for x in range(max_col * 2)]
+    grid: list[float] = [
+        sample(x, y)
         for y in range(max_row * 4)
+        for x in range(max_col * 2)
     ]
     mono = []
     for y in range(max_row * 4):
         for x in range(max_col * 2):
-            approx = (value := grid[y][x]) * adjust_brightness >= threshold(
+            approx = (
+                value := grid[y * max_col * 2 + x]
+            ) * adjust_brightness >= threshold(
                 (sx * x, sy * y)
             )
             mono.append(approx)
             error = (value - (247 * approx)) * dither / 16
             for dx, dy, weight in dither_victims(x, y, error):
-                grid[dy][dx] += error * weight
+                grid[dy * max_col * 2 + dx] += error * weight
     for cy in range(max_row):
         row: list[str] = []
         for cx in range(max_col):
