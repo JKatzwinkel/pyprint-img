@@ -1,5 +1,5 @@
 [project]
-name = 'bryle'
+name = 'brylify'
 version = "0.0.0"
 dependencies = [
   'pillow>=12.1.0',
@@ -13,9 +13,18 @@ dev = [
   'pytest-cov==7.0.*',
 ]
 
+[tool.setuptools]
+packages = ["bryle"]
+
 [project.scripts]
 p = "bryle:main"
 bra = "bryle:main"
 
-[tool.setuptools]
-packages = ["bryle"]
+
+[tool.coverage.report]
+fail_under = 90
+precision = 2
+
+[tool.flake8]
+max_complexity = 8
+doctests = 1
