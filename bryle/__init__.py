@@ -21,7 +21,7 @@ from .img import (
     thr_local_avg_factory,
 )
 from .util import Debug
-from .pxp import rasterize
+from .pxp import rasterize as _rasterize
 
 
 def get_ioctl_windowsize(dev: TextIO) -> tuple[int, int, int, int]:
@@ -153,7 +153,7 @@ def rasterize(
     image = sharpen(image, edging, w / c)
     if image.mode != 'L':
         image = image.convert('L')
-    yield from pxp.rasterize(
+    yield from _rasterize(
         ImgData(image), r, c, w, h,
         threshold=threshold,
         zoom=zoom,
