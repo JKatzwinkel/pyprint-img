@@ -42,7 +42,7 @@ font-preview:
 
 
 # take a screenshot && replace image file at screenshot.png
-take-screenshot cmd='python p.py eppels.png -z4 -e.5' $TERM_RCWH='44x174':
+take-screenshot cmd='bra eppels.png -z4 -e.5' $TERM_RCWH='44x174':
   #!/usr/bin/env bash
   FONT_PS=$(fc-list ':mono' file | grep -im1 'dejavu')
   echo "prompt font: ${FONT_PS%:*}"
