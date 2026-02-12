@@ -11,13 +11,17 @@ from typing import Callable, Iterable, TextIO
 from PIL import Image
 
 from .args import DitherMethod, parse_args
-from .chars import PairCharset, braille
+from .chars import PairCharset
 from .img import (
-    ThresholdFunc, get_threshold_func,
+    ImgData,
+    ThresholdFunc,
+    get_threshold_func,
     plot_brightness_and_threshold,
-    sharpen, thr_local_avg_factory,
+    sharpen,
+    thr_local_avg_factory,
 )
 from .util import Debug
+from . import pxp
 
 
 def get_ioctl_windowsize(dev: TextIO) -> tuple[int, int, int, int]:
@@ -85,143 +89,6 @@ def terminal_rcwh(
     return fallback_values
 
 
-DITHER_ERROR_RECIPIENTS = {
-    'atkinson': [
-        (1, 0, 2), (2, 0, 2), (-1, 1, 2), (0, 1, 2), (1, 1, 2), (0, 2, 2),
-    ],
-    'floyd-steinberg': [
-        (1, 0, 7), (-1, 1, 3), (0, 1, 5), (1, 1, 1),
-    ],
-}
-
-
-def sample_func(
-    image: Image.Image, sx: float, sy: float,
-    interpolate: bool = True,
-) -> Callable[[int, int], int]:
-
-    pixels = image.get_flattened_data()
-    width, height = image.size
-
-    def getpixel(px: int, py: int) -> int:
-        pixelvalue = pixels[px + py * width]
-        assert isinstance(pixelvalue, int), f'{pixelvalue}'
-        return pixelvalue
-
-    def getvalues(px: float, py: float) -> tuple[int, int, int, int]:
-        x1, y1 = int(px), int(py)
-        V = [getpixel(x1, y1)] * 4
-        if x1 + 1 < width:
-            V[1] = getpixel(x1 + 1, y1)
-            if y1 + 1 < height:
-                V[3] = getpixel(x1 + 1, y1 + 1)
-        if y1 + 1 < height:
-            V[2] = getpixel(x1, y1 + 1)
-        return (
-            V[0], V[1],
-            V[2], V[3],
-        )
-
-    def sample(x: int, y: int) -> int:
-        px, py = sx * x, sy * y
-        if px > width or py > height:
-            return 0
-        if not interpolate:
-            return getpixel(int(px), int(py))
-        v1, v2, v3, v4 = getvalues(px, py)
-        dx = px - int(px)
-        wx1 = v1 + (v2 - v1) * dx
-        wx2 = v3 + (v4 - v3) * dx
-        dy = py - int(py)
-        result = wx1 + (wx2 - wx1) * dy
-        return round(result)
-
-    return sample
-
-
-def rasterize(  # noqa: C901
-    image: Image.Image,
-    zoom: float = 1,
-    inverted: bool = False,
-    crop_y: bool = False,
-    edging: int = 0,
-    dither: float = 0,
-    dither_method: DitherMethod = DitherMethod.atkinson,
-    adjust_brightness: float = 1,
-    threshold_func: ThresholdFunc | None = None,
-    interpolate: bool = True,
-    rcwh_func: Callable[
-        [], tuple[int, int, int, int]
-    ] = terminal_rcwh,
-) -> Iterable[str]:
-
-    error_recipients = DITHER_ERROR_RECIPIENTS[dither_method]
-
-    def dither_victims(x: int, y: int, error: float) -> Iterable[
-        tuple[int, int, float]
-    ]:
-        for dx, dy, weight in error_recipients:
-            if not 0 <= (rx := x + dx) < max_col * 2:
-                continue
-            if (ry := y + dy) >= max_row * 4:
-                continue
-            yield rx, ry, weight
-
-    threshold = threshold_func or thr_local_avg_factory(image, 0)
-    r, c, w, h = rcwh_func()
-    cw, ch = w / c, h / r
-    sx, sy = cw / zoom / 2, ch / zoom / 4
-    Debug.log(
-        f'xterm window dimensions: {w}×{h} pixels, {c}×{r} characters'
-    ).log(
-        f'character size in pixels: {cw:.2f}×{ch:.2f}'
-    ).log(
-        f'sample rate in pixels: {sx:.2f} horizontal, {sy:.2f} vertical'
-    )
-    image = sharpen(image, edging, cw)
-    if image.mode != 'L':
-        image = image.convert('L')
-    max_row = round(image.height * zoom / ch) if not crop_y else min(
-        round(image.height * zoom / ch), r
-    )
-    max_col = min(round(image.width * zoom / cw), c)
-    Debug.log(f'using {max_col} columns × {max_row} rows')
-    sample = sample_func(image, sx, sy, interpolate=interpolate)
-    grid: list[float] = [
-        sample(x, y)
-        for y in range(max_row * 4)
-        for x in range(max_col * 2)
-    ]
-    mono = []
-    for y in range(max_row * 4):
-        for x in range(max_col * 2):
-            approx = (
-                value := grid[y * max_col * 2 + x]
-            ) * adjust_brightness >= threshold(
-                (sx * x, sy * y)
-            )
-            mono.append(approx)
-            error = (value - (247 * approx)) * dither / 16
-            for dx, dy, weight in dither_victims(x, y, error):
-                grid[dy * max_col * 2 + dx] += error * weight
-    for cy in range(max_row):
-        row: list[str] = []
-        for cx in range(max_col):
-            registers = [
-                mono[
-                    max_col * 2 * (cy * 4 + dy) + cx * 2 + dx
-                ]
-                for dx, dy in (
-                    (0, 0), (1, 0),
-                    (0, 1), (1, 1),
-                    (0, 2), (1, 2),
-                    (0, 3), (1, 3),
-                )
-            ]
-            row.append(braille(registers, inverted=inverted))
-        yield ''.join(row)
-
-
 def get_zoom_factor(
     image: Image.Image, zoom_factor: float,
     rcwh_func: Callable[
@@ -264,6 +131,39 @@ def plot_image_histogram(
     if options.debug:
         Debug.show(sys.stderr)
     return 0
+
+
+def rasterize(
+    image: Image.Image,
+    zoom: float = 1,
+    inverted: bool = False,
+    crop_y: bool = False,
+    edging: int = 0,
+    dither: float = 0,
+    dither_method: DitherMethod = DitherMethod.atkinson,
+    adjust_brightness: float = 1,
+    threshold_func: ThresholdFunc | None = None,
+    interpolate: bool = True,
+    rcwh_func: Callable[
+        [], tuple[int, int, int, int]
+    ] = terminal_rcwh,
+) -> Iterable[str]:
+    threshold = threshold_func or thr_local_avg_factory(image, 0)
+    r, c, w, h = rcwh_func()
+    image = sharpen(image, edging, w / c)
+    if image.mode != 'L':
+        image = image.convert('L')
+    yield from pxp.rasterize(
+        ImgData(image), r, c, w, h,
+        threshold=threshold,
+        zoom=zoom,
+        interpolate=interpolate,
+        crop_y=crop_y,
+        dither_method=dither_method,
+        adjust_brightness=adjust_brightness,
+        dither=dither,
+        inverted=inverted,
+    )
 
 
 def main(

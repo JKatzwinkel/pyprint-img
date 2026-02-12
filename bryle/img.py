@@ -9,6 +9,12 @@ from .util import Debug
 from .stat import BoxplotCharset, boxplot, percentile, plot
 
 
+class ImgData:
+    def __init__(self, image: Image.Image):
+        self.pixels = image.get_flattened_data()
+        self.width, self.height = image.size
+
+
 type ThresholdFunc = Callable[[tuple[float, float]], float]
 type ThresholdFuncFactory = Callable[[Image.Image, int], ThresholdFunc]
 
