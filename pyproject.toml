@@ -1,10 +1,11 @@
 [build-system]
-requires = ['setuptools>=74.1', 'cython']
+requires = ['setuptools>=74.1', 'cython>=3']
 
 [project]
 name = 'brylify'
 version = "0.0.0"
 dependencies = [
+  'cython>=3',
   'pillow>=12.1.0',
 ]
 
