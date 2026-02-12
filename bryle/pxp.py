@@ -1,4 +1,12 @@
+# cython: language_level=3
+# cython: boundscheck=False
+# cython: wraparound=False
+# cython: cdivision=True
+# cython: profile=True
+
 from typing import Callable, Iterable
+
+import cython
 
 from .args import DitherMethod
 from .chars import braille
@@ -8,41 +16,42 @@ from .util import Debug
 
 def sample_func(
     img: ImgData,
-    sx: float, sy: float,
-    interpolate: bool = True,
+    sx: cython.double,
+    sy: cython.double,
+    interpolate: cython.bint = True,
 ) -> Callable[[int, int], int]:
+    width: cython.int = img.width
+    height: cython.int = img.height
 
-    def getpixel(px: int, py: int) -> int:
-        pixelvalue = img.pixels[px + py * img.width]
-        assert isinstance(pixelvalue, int), f'{pixelvalue}'
+    def getpixel(px: cython.int, py: cython.int) -> cython.int:
+        pixelvalue = img.pixels[px + py * width]
         return pixelvalue
 
-    def getvalues(px: float, py: float) -> tuple[int, int, int, int]:
-        x1, y1 = int(px), int(py)
-        V = [getpixel(x1, y1)] * 4
-        if x1 + 1 < img.width:
+    def getvalues(px: cython.double, py: cython.double) -> cython.int[4]:
+        x1: cython.int = int(px)
+        y1: cython.int = int(py)
+        V: cython.int[4] = [getpixel(x1, y1)] * 4
+        if x1 + 1 < width:
             V[1] = getpixel(x1 + 1, y1)
-            if y1 + 1 < img.height:
+            if y1 + 1 < height:
                 V[3] = getpixel(x1 + 1, y1 + 1)
-        if y1 + 1 < img.height:
+        if y1 + 1 < height:
             V[2] = getpixel(x1, y1 + 1)
-        return (
-            V[0], V[1],
-            V[2], V[3],
-        )
+        return V
 
-    def sample(x: int, y: int) -> int:
-        px, py = sx * x, sy * y
-        if px > img.width or py > img.height:
+    def sample(x: cython.int, y: cython.int) -> cython.int:
+        px: cython.float = sx * x
+        py: cython.float = sy * y
+        if px > width or py > height:
             return 0
         if not interpolate:
             return getpixel(int(px), int(py))
-        v1, v2, v3, v4 = getvalues(px, py)
-        dx = px - int(px)
-        wx1 = v1 + (v2 - v1) * dx
-        wx2 = v3 + (v4 - v3) * dx
-        dy = py - int(py)
-        result = wx1 + (wx2 - wx1) * dy
+        V = getvalues(px, py)
+        dx: cython.double = px - int(px)
+        wx1: cython.double = V[0] + (V[1] - V[0]) * dx
+        wx2: cython.double = V[2] + (V[3] - V[2]) * dx
+        dy: cython.double = py - int(py)
+        result: cython.double = wx1 + (wx2 - wx1) * dy
         return round(result)
 
     return sample

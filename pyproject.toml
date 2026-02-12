@@ -1,3 +1,6 @@
+[build-system]
+requires = ['setuptools>=74.1', 'cython']
+
 [project]
 name = 'brylify'
 version = "0.0.0"
@@ -15,6 +18,13 @@ dev = [
 
 [tool.setuptools]
 packages = ["bryle"]
+
+[[tool.setuptools.ext-modules]]
+name = "bryle.pxp"
+sources = ["bryle/pxp.py"]
+
+[tool.setuptools.package-data]
+bryle = ["*.pyx"]
 
 [project.scripts]
 p = "bryle:main"

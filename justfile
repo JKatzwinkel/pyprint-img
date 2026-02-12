@@ -74,3 +74,22 @@ lint flake8_args='':
 # run mypy
 type mypy_args='':
   python -mmypy --strict {{mypy_args}} tests/ util/
+
+# python profiler
+profile:
+  #!/usr/bin/env python
+  import cProfile
+  import bryle
+  with cProfile.Profile() as pr:
+      bryle.main('eppels.png -xe.5'.split())
+      pr.print_stats(sort='cumulative')
+
+# cython annotate code
+cy:
+  cython -va bryle/pxp.py
+
+# cython compilation status
+pxp:
+  #!/usr/bin/env python
+  import bryle.pxp
+  print(f'cython module loaded: {bryle.pxp.__file__}')

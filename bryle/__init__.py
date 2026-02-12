@@ -21,7 +21,7 @@ from .img import (
     thr_local_avg_factory,
 )
 from .util import Debug
-from . import pxp
+from .pxp import rasterize
 
 
 def get_ioctl_windowsize(dev: TextIO) -> tuple[int, int, int, int]:
