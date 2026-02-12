@@ -166,6 +166,15 @@ def rasterize(
     )
 
 
+def printr(line: str, file: io.TextIOWrapper) -> str:
+    out = (
+        f'\033[1;97m{line}\033[0m' if file.isatty()
+        else f'{line}'
+    )
+    print(out, file=file)
+    return out
+
+
 def main(
     argv: list[str] = sys.argv[1:],
     load_image_file_func: Callable[
@@ -206,7 +215,7 @@ def main(
         Debug.show(sys.stderr)
     with options.outputfile.open('w') as f:
         for row in rows:
-            print(f'{row}', file=f)
+            printr(row, file=f)
     return 0
 
 
