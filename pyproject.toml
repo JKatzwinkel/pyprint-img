@@ -1,0 +1,21 @@
+[project]
+name = 'bryle'
+version = "0.0.0"
+dependencies = [
+  'pillow>=12.1.0',
+]
+
+[project.optional-dependencies]
+dev = [
+  'flake8-pyproject',
+  'flake8-simplify',
+  'mypy',
+  'pytest-cov',
+]
+
+[project.scripts]
+p = "bryle:main"
+bra = "bryle:main"
+
+[tool.setuptools]
+packages = ["bryle"]

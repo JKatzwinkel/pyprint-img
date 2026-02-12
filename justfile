@@ -3,7 +3,7 @@ default: test type lint
 
 # print tool's `--help` output
 help:
-  python p.py -h
+  bra -h
 
 alias update-manual := doc
 
@@ -16,7 +16,7 @@ with the output of running cli --help again")]
 doc-help $TERM_RCWH='44x174':
   #!/usr/bin/env bash
   set -euo pipefail
-  sed -i -ne '/```help/ {p; r'<(python p.py -h) \
+  sed -i -ne '/```help/ {p; r'<(bra -h) \
     -e ':a; n; /```/ {p; b}; ba}; p' readme.md
 
 

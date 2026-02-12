@@ -83,7 +83,7 @@ example image:
 basic usage:
 
 ```bash
-python p.py eppels.png
+bra eppels.png
 ```
 
 ```output
@@ -101,9 +101,9 @@ read from stdin by passing `-` as the file argument:
 
 ```bash
 paste <( \
-echo eppels.png | python p.py - \
+echo eppels.png | bra - \
 ) <(\
-cat eppels.png | python p.py - \
+cat eppels.png | bra - \
 )
 ```
 
@@ -123,7 +123,7 @@ this is useful for integrating with other command-line tools:
 ```bash
 # enable 10% dithering && invert output
 curl -s https://www.python.org/static/community_logos/python-logo-master-v3-TM.png \
-  | python p.py - -ve.1
+  | bra - -ve.1
 ```
 
 ```output
@@ -144,7 +144,7 @@ curl -s https://www.python.org/static/community_logos/python-logo-master-v3-TM.p
 enable dithering but invert color values:
 
 ```bash
-python p.py eppels.png -e.5 -v
+bra eppels.png -e.5 -v
 ```
 
 ```output
@@ -161,7 +161,7 @@ python p.py eppels.png -e.5 -v
 scale input image by factor `2` first and raise threshold forgivingness by 1%:
 
 ```bash
-python p.py eppels.png -z 2 -b 101
+bra eppels.png -z 2 -b 101
 ```
 
 ```output
@@ -189,7 +189,7 @@ adjustment by applying gaussian blur with a radius proportional to the image's
 dimensions. A smaller radius value can bring out more detail:
 
 ```bash
-python p.py eppels.png -t 5
+bra eppels.png -t 5
 ```
 
 ```output
@@ -207,7 +207,7 @@ the input image can be de-noised somewhat by emphasizing edges with the option
 `-a`/`--sharpen`.
 
 ```bash
-python p.py eppels.png -t 5 -aaa
+bra eppels.png -t 5 -aaa
 ```
 
 ```output
@@ -224,7 +224,7 @@ python p.py eppels.png -t 5 -aaa
 enable debug messages to `/dev/stderr` with the `-d`/`--debug` flag.
 
 ```bash
-TERM_RCWH=5x20 python p.py eppels.png -dxy 2>&1
+TERM_RCWH=5x20 bra eppels.png -dxy 2>&1
 ```
 
 ```output
@@ -254,7 +254,7 @@ cannot be determined and passing of a fixed terminal size might be necessary:
 # set fixed terminal size in rows×cols
 export TERM_RCWH=14x79
 # run braillify with no tty at neither stdin nor stdout
-cat shelly.jpg | python p.py - -dxye.3 2>&1 > >(cat)
+cat shelly.jpg | bra - -dxye.3 2>&1 > >(cat)
 ```
 
 ```output
@@ -294,7 +294,7 @@ radius into account when sampling a pixel and deciding whether its value exceeds
 the required threshold.
 
 ```bash
-python p.py eppels.png -z 2
+bra eppels.png -z 2
 ```
 
 > the option `--threshold local` is implied when omitted
@@ -324,7 +324,7 @@ allows to adjust the respective threshold values before sampling. Use the
 `-H/--histogram` flag to show the effects.
 
 ```bash
-python p.py eppels.png -z 2 -m local -t 16 -b 110
+bra eppels.png -z 2 -m local -t 16 -b 110
 ```
 
 ```output
@@ -347,7 +347,7 @@ python p.py eppels.png -z 2 -m local -t 16 -b 110
 ```
 
 ```bash
-python p.py eppels.png -z 2 -m local -t 16 -b 110 -H
+bra eppels.png -z 2 -m local -t 16 -b 110 -H
 ```
 
 ```output
@@ -370,7 +370,7 @@ the `median` setting on the other hand uses the median brightness across the ent
 image as its threshold, without adjusting for overall darker or lighter areas.
 
 ```bash
-python p.py --threshold median -z 2 eppels.png
+bra --threshold median -z 2 eppels.png
 ```
 
 ```output
@@ -395,7 +395,7 @@ python p.py --threshold median -z 2 eppels.png
 <details><summary>median threshold histogram</summary>
 
 ```bash
-python p.py -mmedian -H eppels.png
+bra -mmedian -H eppels.png
 ```
 
 ```output
@@ -420,7 +420,7 @@ specifying which percentile of the brightness distribution should be used as
 threshold. So passing `-m percentile -t 50` would be equivalent to `-m median`.
 
 ```bash
-python p.py --threshold percentile -t 35 -z 2 eppels.png
+bra --threshold percentile -t 35 -z 2 eppels.png
 ```
 
 ```output
@@ -445,7 +445,7 @@ python p.py --threshold percentile -t 35 -z 2 eppels.png
 <details><summary>percentile threshold histogram</summary>
 
 ```bash
-python p.py --threshold percentile -t 35 -H eppels.png
+bra --threshold percentile -t 35 -H eppels.png
 ```
 
 ```output
@@ -469,7 +469,7 @@ the `extrema` setting just calculates the threshold right between the darkest an
 the lightest pixel values, without regard for their respective frequency.
 
 ```bash
-python p.py -m extrema -z 2 eppels.png
+bra -m extrema -z 2 eppels.png
 ```
 
 ```output
@@ -494,7 +494,7 @@ python p.py -m extrema -z 2 eppels.png
 <details><summary>extrema threshold histogram</summary>
 
 ```bash
-python p.py -mextrema -H eppels.png
+bra -mextrema -H eppels.png
 ```
 
 ```output
@@ -519,7 +519,7 @@ finally, it is possible to just pass the literal threshold value straight up
 into the thing using `-t`/`--threshold-arg` with the `const` setting:
 
 ```bash
-python p.py -m const -z 2 -t 160 eppels.png
+bra -m const -z 2 -t 160 eppels.png
 ```
 
 ```output
@@ -544,7 +544,7 @@ python p.py -m const -z 2 -t 160 eppels.png
 <details><summary>const threshold histogram</summary>
 
 ```bash
-python p.py -mconst -H eppels.png -t160
+bra -mconst -H eppels.png -t160
 ```
 
 ```output
@@ -573,7 +573,7 @@ result of the monochrome mapping error function is being distributed to
 neighboring pixels.
 
 ```bash
-python p.py eppels.png -z 2 --dither
+bra eppels.png -z 2 --dither
 ```
 
 ```output
@@ -600,7 +600,7 @@ means that all of the error gets distributed (i.e. 75% because it is atkinson
 dithering).
 
 ```bash
-python p.py eppels.png -z 2 -e .5
+bra eppels.png -z 2 -e .5
 ```
 
 ```output
@@ -625,7 +625,7 @@ python p.py eppels.png -z 2 -e .5
 floyd-steinberg dithering can be used as an alternative method.
 
 ```bash
-python p.py eppels.png -z2 -e.5 --floyd
+bra eppels.png -z2 -e.5 --floyd
 ```
 
 ```output

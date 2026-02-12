@@ -23,7 +23,7 @@ jobs:
 
       - uses: extractions/setup-just@v3
 
-      - run: pip install -r requirements-dev.txt
+      - run: pip install .[dev]
 
       - run: just test -v
 
@@ -51,7 +51,10 @@ jobs:
 
       - uses: extractions/setup-just@v3
 
-      - run: pip install -r requirements.txt
+      - run: pip install .
+
+      - name: print help
+        run: bra -h
 
       - name: ':memo: update code examples in readme.md'
         run: just doc
