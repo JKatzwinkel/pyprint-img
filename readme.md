@@ -8,9 +8,9 @@ converts image files into monochrome unicode text utilizing the braille charset.
 ## usage
 
 ```help
-usage: p.py [-h] [-m MODE] [-o FILE] [-f] [-H] [-d] [-y] [-z FACTOR | -x] [-v]
-            [-a] [-A] [-b LEVEL] [-e [FACTOR]] [-D METH | --floyd] [-t NUM]
-            FILE
+usage: bra [-h] [-m MODE] [-o FILE] [-f] [-H] [-d] [-y] [-z FACTOR | -x] [-v]
+           [-a] [-A] [-b LEVEL] [-e [FACTOR]] [-D METH | --floyd] [-t NUM]
+           FILE
 
 rasterize an image into the terminal.
 
@@ -57,7 +57,7 @@ dithering options:
                         default: atkinson).
   --floyd               shortcut for -Dfloyd-steinberg
 
-p.py reads the environment variable TERM_RCWH which when set bypasses any
+bra reads the environment variable TERM_RCWH which when set bypasses any
 attempt at determining actual terminal && xterm window sizes from tty and
 ioctl and forces fixed terminal and optionally window size to be used for
 image processing. TERM_RCWH accepts values in the forms `RxC` and `RxCxWxH`
