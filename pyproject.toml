@@ -7,10 +7,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  'flake8-pyproject',
-  'flake8-simplify',
-  'mypy',
-  'pytest-cov',
+  'flake8-pyproject==1.2.*',
+  'flake8-simplify==0.30.*',
+  'mypy==1.19.*',
+  'pytest-cov==7.0.*',
 ]
 
 [project.scripts]

@@ -1,12 +1,21 @@
 ---
+
 version: 2
 updates:
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     cooldown:
       default-days: 3
+    commit-message:
+      prefix: ':octocat'
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: daily
     commit-message:
       prefix: ':dependabot'
 
