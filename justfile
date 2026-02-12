@@ -44,6 +44,7 @@ font-preview:
 # take a screenshot && replace image file at screenshot.png
 take-screenshot cmd='bra eppels.png -z4 -e.5' $TERM_RCWH='44x174':
   #!/usr/bin/env bash
+  set -euo pipefail
   FONT_PS=$(fc-list ':mono' file | grep -im1 'dejavu')
   echo "prompt font: ${FONT_PS%:*}"
   FONT_OUT=$(fc-list ':charset=2800 :mono' file | grep -vim1 'freemono')
@@ -74,3 +75,12 @@ lint flake8_args='':
 # run mypy
 type mypy_args='':
   python -mmypy --strict {{mypy_args}} tests/ util/
+
+# python profiler
+profile:
+  #!/usr/bin/env python
+  import cProfile
+  import bryle
+  with cProfile.Profile() as pr:
+      bryle.main('eppels.png -xe.5'.split())
+      pr.print_stats(sort='cumulative')
