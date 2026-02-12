@@ -43,16 +43,17 @@ def thr_local_avg_factory(
     image: Image.Image, blur_radius: int = 0
 ) -> ThresholdFunc:
     def threshold(pixel: tuple[float, float]) -> int:
-        if pixel[0] > image.width or pixel[1] > image.height:
+        if pixel[0] > width or pixel[1] > height:
             return 0
         assert isinstance(
             pixelvalue := pixels[
-                int(pixel[0]) + int(pixel[1]) * image.width
+                int(pixel[0]) + int(pixel[1]) * width
             ], int
         )
         return pixelvalue
+    width, height = image.size
     blur_radius = blur_radius or max(
-        12, min(image.width, image.height) // 16
+        12, min(width, height) // 16
     )
     Debug.log(f'gaussian blur radius for `local` mode: {blur_radius}')
     pixels = image.filter(

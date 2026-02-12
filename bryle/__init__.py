@@ -101,20 +101,21 @@ def sample_func(
 ) -> Callable[[int, int], int]:
 
     pixels = image.get_flattened_data()
+    width, height = image.size
 
     def getpixel(px: int, py: int) -> int:
-        pixelvalue = pixels[px + py * image.width]
+        pixelvalue = pixels[px + py * width]
         assert isinstance(pixelvalue, int), f'{pixelvalue}'
         return pixelvalue
 
     def getvalues(px: float, py: float) -> tuple[int, int, int, int]:
         x1, y1 = int(px), int(py)
         V = [getpixel(x1, y1)] * 4
-        if x1 + 1 < image.width:
+        if x1 + 1 < width:
             V[1] = getpixel(x1 + 1, y1)
-            if y1 + 1 < image.height:
+            if y1 + 1 < height:
                 V[3] = getpixel(x1 + 1, y1 + 1)
-        if y1 + 1 < image.height:
+        if y1 + 1 < height:
             V[2] = getpixel(x1, y1 + 1)
         return (
             V[0], V[1],
@@ -123,7 +124,7 @@ def sample_func(
 
     def sample(x: int, y: int) -> int:
         px, py = sx * x, sy * y
-        if px > image.width or py > image.height:
+        if px > width or py > height:
             return 0
         if not interpolate:
             return getpixel(int(px), int(py))
