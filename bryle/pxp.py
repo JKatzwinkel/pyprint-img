@@ -58,7 +58,7 @@ DITHER_ERROR_RECIPIENTS = {
 }
 
 
-def rasterize(  # noqa: C901
+def rasterize(
     imdat: ImgData,
     r: int, c: int, w: int, h: int,
     /, *,
@@ -73,7 +73,7 @@ def rasterize(  # noqa: C901
 
     error_recipients = DITHER_ERROR_RECIPIENTS[dither_method]
 
-    def dither_victims(x: int, y: int, error: float) -> Iterable[
+    def dither_victims(x: int, y: int) -> Iterable[
         tuple[int, int, float]
     ]:
         for dx, dy, weight in error_recipients:
@@ -113,10 +113,18 @@ def rasterize(  # noqa: C901
             )
             mono.append(approx)
             error = (value - (247 * approx)) * dither / 16
-            for dx, dy, weight in dither_victims(x, y, error):
+            for dx, dy, weight in dither_victims(x, y):
                 grid[dy * max_col * 2 + dx] += error * weight
+    yield from characterize(
+        mono, max_col, max_row, inverted,
+    )
+
+
+def characterize(
+    mono: list[bool], max_col: int, max_row: int, inverted: bool,
+) -> Iterable[str]:
+    row: list[str] = []
     for cy in range(max_row):
-        row: list[str] = []
         for cx in range(max_col):
             registers = [
                 mono[
@@ -131,3 +139,4 @@ def rasterize(  # noqa: C901
             ]
             row.append(braille(registers, inverted=inverted))
         yield ''.join(row)
+        row.clear()
