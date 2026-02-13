@@ -76,6 +76,10 @@ lint flake8_args='':
 type mypy_args='':
   python -mmypy --strict {{mypy_args}} tests/ util/
 
+# run isort
+isort:
+  python -misort .
+
 # python profiler
 profile:
   #!/usr/bin/env python

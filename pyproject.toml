@@ -9,6 +9,7 @@ dependencies = [
 dev = [
   'flake8-pyproject==1.2.*',
   'flake8-simplify==0.30.*',
+  'isort==7.0.*',
   'mypy==1.19.*',
   'pytest-cov==7.0.*',
 ]
@@ -28,3 +29,6 @@ precision = 2
 [tool.flake8]
 max_complexity = 8
 doctests = 1
+
+[tool.isort]
+profile = 'black'
