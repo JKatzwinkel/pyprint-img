@@ -10,6 +10,7 @@ from typing import Callable, Iterable, TextIO
 
 from PIL import Image
 
+from . import pxp
 from .args import DitherMethod, parse_args
 from .chars import PairCharset
 from .img import (
@@ -21,7 +22,6 @@ from .img import (
     thr_local_avg_factory,
 )
 from .util import Debug
-from . import pxp
 
 
 def get_ioctl_windowsize(dev: TextIO) -> tuple[int, int, int, int]:
@@ -168,7 +168,7 @@ def rasterize(
 
 def printr(line: str, file: io.TextIOWrapper) -> str:
     out = (
-        f'\033[1;97m{line}\033[0m' if file.isatty()
+        f'\033[38;5;231m{line}\033[0m' if file.isatty()
         else f'{line}'
     )
     print(out, file=file)

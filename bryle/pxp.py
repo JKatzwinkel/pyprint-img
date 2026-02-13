@@ -112,7 +112,7 @@ def rasterize(
                 (sx * x, sy * y)
             )
             mono.append(approx)
-            error = (value - (247 * approx)) * dither / 16
+            error = (value - (255 * approx)) * dither / 16
             for dx, dy, weight in dither_victims(x, y):
                 grid[dy * max_col * 2 + dx] += error * weight
     yield from characterize(
