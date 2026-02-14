@@ -84,7 +84,10 @@ isort:
 profile:
   #!/usr/bin/env python
   import cProfile
+  import pstats
   import bryle
   with cProfile.Profile() as pr:
       bryle.main('eppels.png -xe.5'.split())
-      pr.print_stats(sort='cumulative')
+      stats = pstats.Stats(pr)
+      stats.sort_stats('cumulative')
+      stats.print_stats(16)
