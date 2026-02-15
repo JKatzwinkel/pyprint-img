@@ -150,7 +150,7 @@ def rasterize(
 ) -> Iterable[str]:
     threshold = threshold_func or thr_local_avg_factory(image, 0)
     r, c, w, h = rcwh_func()
-    image = sharpen(image, edging, w / c)
+    image = sharpen(image, edging, w / c / 2)
     if image.mode != 'L':
         image = image.convert('L')
     yield from pxp.rasterize(
