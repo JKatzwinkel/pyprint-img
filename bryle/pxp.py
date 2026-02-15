@@ -1,3 +1,4 @@
+import array
 from typing import Callable, Iterable
 
 from .args import DitherMethod
@@ -12,10 +13,12 @@ def sample_func(
     interpolate: bool = True,
 ) -> Callable[[int, int], int]:
 
+    pixels = array.array('B', img.pixels)  # type: ignore[type-var]
+    width = img.width
+
     def getpixel(px: int, py: int) -> int:
-        pixelvalue = img.pixels[px + py * img.width]
-        assert isinstance(pixelvalue, int), f'{pixelvalue}'
-        return pixelvalue
+        pixelvalue = pixels[px + py * width]
+        return pixelvalue  # type: ignore[return-value]
 
     def getvalues(px: float, py: float) -> tuple[int, int, int, int]:
         x1, y1 = int(px), int(py)
@@ -74,14 +77,15 @@ def rasterize(
     error_recipients = DITHER_ERROR_RECIPIENTS[dither_method]
 
     def dither_victims(x: int, y: int) -> Iterable[
-        tuple[int, int, float]
+        tuple[int, int, int]
     ]:
-        for dx, dy, weight in error_recipients:
-            if not 0 <= (rx := x + dx) < max_col * 2:
-                continue
-            if (ry := y + dy) >= max_row * 4:
-                continue
-            yield rx, ry, weight
+        return [
+            (rx, ry, weight) for dx, dy, weight in error_recipients
+            if (
+                0 <= (rx := x + dx) < max_col * 2 and
+                (ry := y + dy) < max_row * 4
+            )
+        ]
 
     cw, ch = w / c, h / r
     sx, sy = cw / zoom / 2, ch / zoom / 4

@@ -1,6 +1,8 @@
 import argparse
+import array
 from collections import defaultdict
 from typing import Callable, Iterable
+import sys
 
 from PIL import Image, ImageChops, ImageFilter
 
@@ -11,7 +13,9 @@ from .stat import BoxplotCharset, boxplot, percentile, plot
 
 class ImgData:
     def __init__(self, image: Image.Image):
-        self.pixels = image.get_flattened_data()
+        self.pixels = array.array(  # type: ignore[type-var]
+            'B', image.get_flattened_data()
+        )
         self.width, self.height = image.size
 
 
@@ -82,9 +86,13 @@ THRESHOLD_FUNC_FACTORIES: dict[
 def get_threshold_func(
     image: Image.Image, options: argparse.Namespace
 ) -> ThresholdFunc:
-    return THRESHOLD_FUNC_FACTORIES[options.threshold_mode][0](
-        image, options.threshold_arg
-    )
+    try:
+        return THRESHOLD_FUNC_FACTORIES[options.threshold_mode][0](
+            image, options.threshold_arg
+        )
+    except Exception as e:
+        Debug.show(sys.stderr)
+        raise e
 
 
 def sharpen(
