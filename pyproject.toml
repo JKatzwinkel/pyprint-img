@@ -9,7 +9,7 @@ dependencies = [
 dev = [
   'flake8-pyproject==1.2.*',
   'flake8-simplify==0.30.*',
-  'isort==7.0.*',
+  'isort==8.0.*',
   'mypy==1.19.*',
   'pytest-cov==7.0.*',
 ]
