@@ -1,14 +1,14 @@
-from PIL import Image
+import pyvips
 
 import pytest
 
 from bryle.args import parse_args
-from bryle.img import plot_brightness_and_threshold
+from bryle.img import histogram, plot_brightness_and_threshold
 from bryle.stat import BoxplotCharset, boxplot, extrema, plot
 
 
-def test_extrema(image: Image.Image) -> None:
-    assert extrema(image.histogram()) == image.getextrema()
+def test_extrema(image: pyvips.Image) -> None:
+    assert extrema(histogram(image)) == (int(image.min()), int(image.max()))
 
 
 @pytest.mark.parametrize(
@@ -46,8 +46,8 @@ def test_boxplots(
     assert boxplot(bins, charset=charset) == expect, '\n'.join(plot(bins))
 
 
-def test_plot_histogram(image: Image.Image) -> None:
-    lines = list(plot(image.histogram(), c=64, r=8, fns='ascii'))
+def test_plot_histogram(image: pyvips.Image) -> None:
+    lines = list(plot(histogram(image), c=64, r=8, fns='ascii'))
     result = '\n'.join([''] + lines)
     assert len(lines) == 8 + 2, result
     assert len(lines[0]) == 64, result
@@ -58,15 +58,15 @@ def test_plot_histogram(image: Image.Image) -> None:
     'argv, thresh_plot', (
         (
             '-mlocal -t 30',
-            '────────┾━━━━━╋━━━┽───────'
+            '─────────┾━━━━━━━╋━━━┽──────'
         ),
         (
             '-mlocal -t 50',
-            '──┾━╋━━┽──────'
+            '──┾━━━╋━━━┽──────'
         ),
         (
             '-mlocal -t30 -b120',
-            '───────┾━━━━╋━━┽─────'
+            '────────┾━━━━━╋━━━┽─────'
         ),
         (
             '-mmedian', '╋'
@@ -74,7 +74,7 @@ def test_plot_histogram(image: Image.Image) -> None:
     )
 )
 def test_plot_histogram_with_thresholds(
-    image: Image.Image, argv: str, thresh_plot: str,
+    image: pyvips.Image, argv: str, thresh_plot: str,
 ) -> None:
     options = parse_args(['f.png'] + argv.split())  # noqa: SIM905
     lines = list(

@@ -2,7 +2,7 @@ import pathlib
 import sys
 from typing import Callable, Iterable, TextIO
 
-from PIL import Image
+import pyvips
 
 from unittest import mock
 import tempfile
@@ -93,7 +93,7 @@ def test_cli_help(
 
 def test_cli_debug_output(
     capsys: pytest.CaptureFixture[str],
-    load_cached_image: Callable[[str], Image.Image],
+    load_cached_image: Callable[[str], pyvips.Image],
 ) -> None:
     main(
         'eppels.png -z .5 -o /dev/null -f -dA'.split(),  # noqa: SIM905
@@ -115,8 +115,8 @@ def tmpfile() -> Iterable[pathlib.Path]:
 
 @pytest.fixture(scope='session')
 def load_cached_image(
-    image: Image.Image
-) -> Iterable[Callable[[str], Image.Image]]:
+    image: pyvips.Image
+) -> Iterable[Callable[[str], pyvips.Image]]:
     yield lambda filename: image
 
 
@@ -126,7 +126,7 @@ def load_cached_image(
 )
 def test_cli_creates_file(
     _terminal_rcwh_mock: mock.MagicMock, tmpfile: pathlib.Path,
-    load_cached_image: Callable[[str], Image.Image],
+    load_cached_image: Callable[[str], pyvips.Image],
 ) -> None:
     outfile = tmpfile
     main(
@@ -154,7 +154,7 @@ def test_cli_creates_file(
 def test_overwrite_terminal_size_via_env_var(
     os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
-    load_cached_image: Callable[[str], Image.Image],
+    load_cached_image: Callable[[str], pyvips.Image],
     rcwh_var: str,
 ) -> None:
     os_environ_get_mock.side_effect = lambda k: rcwh_var
@@ -174,7 +174,7 @@ def test_overwrite_terminal_size_via_env_var(
 def test_fit_to_width(
     os_environ_get_mock: mock.MagicMock,
     tmpfile: pathlib.Path,
-    load_cached_image: Callable[[str], Image.Image],
+    load_cached_image: Callable[[str], pyvips.Image],
     columns: int,
 ) -> None:
     os_environ_get_mock.side_effect = lambda k: f'20x{columns}'
@@ -244,7 +244,7 @@ def test_stdin_input_inappropriate_ioctl_for_device(
     )
 )
 def test_dither_method(
-    image: Image.Image, method: DitherMethod,
+    image: pyvips.Image, method: DitherMethod,
     patterns: list[str], expected: bool,
 ) -> None:
     result = ['']
@@ -264,7 +264,7 @@ def test_dither_method(
     assert assertion, f'any of "{patterns}" {predicate} in {output}'
 
 
-def test_zoom(image: Image.Image) -> None:
+def test_zoom(image: pyvips.Image) -> None:
     for line in rasterize(image):
         break
     for line2x in rasterize(image, zoom=2.):
@@ -272,7 +272,7 @@ def test_zoom(image: Image.Image) -> None:
     assert len(line) == len(line2x) // 2
 
 
-def test_fit_to_window(image: Image.Image) -> None:
+def test_fit_to_window(image: pyvips.Image) -> None:
     rcwh_func = lambda: (11, 44, 1914, 1012)  # noqa: E731
     lines = [
         line for line in rasterize(
@@ -286,7 +286,7 @@ def test_fit_to_window(image: Image.Image) -> None:
 
 
 def test_histogram(
-    image: Image.Image,
+    image: pyvips.Image,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     options = parse_args('-Hd f.tif -t20'.split())  # noqa: SIM905

@@ -8,7 +8,7 @@ import sys
 import termios
 from typing import Callable, Iterable, TextIO
 
-from PIL import Image
+import pyvips
 
 from . import pxp
 from .args import DitherMethod, parse_args
@@ -90,7 +90,7 @@ def terminal_rcwh(
 
 
 def get_zoom_factor(
-    image: Image.Image, zoom_factor: float,
+    image: pyvips.Image, zoom_factor: float,
     rcwh_func: Callable[
         [], tuple[int, int, int, int]
     ] = terminal_rcwh,
@@ -102,28 +102,38 @@ def get_zoom_factor(
     return zoom_factor
 
 
-def load_image_file(filename: str) -> Image.Image:
+def load_image_file(filename: str) -> pyvips.Image:
     if filename != '-':
         Debug.log(f'input file: {filename}')
-        return Image.open(pathlib.Path(filename)).copy()
+        path = pathlib.Path(filename)
+        if not path.exists():
+            raise FileNotFoundError(f'No such file or directory: {filename!r}')
+        return pyvips.Image.new_from_file(str(path))
     byteinput = sys.stdin.buffer.read()
     try:
-        result = Image.open(
+        result = pyvips.Image.new_from_file(
             filename := byteinput.decode('utf8').strip()
-        ).copy()
+        )
         Debug.log(f'input file: {filename}')
         return result
     except Exception:
         ...
-    return Image.open(io.BytesIO(byteinput)).copy()
+    return pyvips.Image.new_from_buffer(byteinput, '')
+
+
+def _to_grey(image: pyvips.Image) -> pyvips.Image:
+    if image.bands > 1:
+        if image.hasalpha():
+            image = image.flatten()
+        return image.colourspace(pyvips.Interpretation.B_W)
+    return image
 
 
 def plot_image_histogram(
-    image: Image.Image, options: argparse.Namespace,
+    image: pyvips.Image, options: argparse.Namespace,
     charset: PairCharset = 'blocks',
 ) -> int:
-    if image.mode != 'L':
-        image = image.convert('L')
+    image = _to_grey(image)
     for line in plot_brightness_and_threshold(
         image, options, charset=charset,
     ):
@@ -134,7 +144,7 @@ def plot_image_histogram(
 
 
 def rasterize(
-    image: Image.Image,
+    image: pyvips.Image,
     zoom: float = 1,
     inverted: bool = False,
     crop_y: bool = False,
@@ -151,8 +161,7 @@ def rasterize(
     threshold = threshold_func or thr_local_avg_factory(image, 0)
     r, c, w, h = rcwh_func()
     image = sharpen(image, edging, w / c / 2)
-    if image.mode != 'L':
-        image = image.convert('L')
+    image = _to_grey(image)
     yield from pxp.rasterize(
         ImgData(image), r, c, w, h,
         threshold=threshold,
@@ -178,7 +187,7 @@ def printr(line: str, file: io.TextIOWrapper) -> str:
 def main(
     argv: list[str] = sys.argv[1:],
     load_image_file_func: Callable[
-        [str], Image.Image
+        [str], pyvips.Image
     ] = load_image_file,
 ) -> int:
     options = parse_args(argv)
@@ -190,7 +199,7 @@ def main(
         )
         sys.exit(1)
     image = load_image_file_func(options.inputfile)
-    Debug.log(f'image dimensions: {"×".join(map(str, image.size))}')
+    Debug.log(f'image dimensions: {image.width}×{image.height}')
     if options.histogram:
         return plot_image_histogram(
             image, options,

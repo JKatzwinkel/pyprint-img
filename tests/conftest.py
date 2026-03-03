@@ -1,8 +1,9 @@
-from PIL import Image
+import pyvips
 
 import pytest
 
 
 @pytest.fixture(scope='session')
-def image() -> Image.Image:
-    return Image.open('eppels.png').convert('L')
+def image() -> pyvips.Image:
+    img = pyvips.Image.new_from_file('eppels.png')
+    return img.colourspace(pyvips.Interpretation.B_W)

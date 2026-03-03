@@ -1,4 +1,4 @@
-from PIL import Image
+import pyvips
 
 import pytest
 
@@ -20,7 +20,7 @@ from bryle.pxp import sample_func
 )
 def test_sampling(x: int, y: int, value: int) -> None:
     imdat = ImgData(
-        Image.frombytes('L', (2, 2), b'\x00\x40\x80\xff')
+        pyvips.Image.new_from_memory(b'\x00\x40\x80\xff', 2, 2, 1, pyvips.BandFormat.UCHAR)
     )
     sample = sample_func(imdat, .5, .5)
     assert sample(x, y) == value
