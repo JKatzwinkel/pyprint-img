@@ -8,7 +8,7 @@ import sys
 import termios
 from typing import Callable, Iterable, TextIO
 
-import pyvips
+import pyvips  # type: ignore[import-untyped]
 
 from . import pxp
 from .args import DitherMethod, parse_args

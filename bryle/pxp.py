@@ -13,12 +13,12 @@ def sample_func(
     interpolate: bool = True,
 ) -> Callable[[int, int], int]:
 
-    pixels = array.array('B', img.pixels)  # type: ignore[type-var]
+    pixels = array.array('B', img.pixels)
     width = img.width
 
     def getpixel(px: int, py: int) -> int:
         pixelvalue = pixels[px + py * width]
-        return pixelvalue  # type: ignore[return-value]
+        return int(pixelvalue)
 
     def getvalues(px: float, py: float) -> tuple[int, int, int, int]:
         x1, y1 = int(px), int(py)

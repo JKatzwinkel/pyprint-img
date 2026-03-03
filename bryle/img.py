@@ -5,7 +5,7 @@ from collections import defaultdict
 from typing import Callable, Iterable
 import sys
 
-import pyvips
+import pyvips  # type: ignore[import-untyped]
 
 from .chars import PairCharset
 from .util import Debug
@@ -27,7 +27,7 @@ def histogram(image: pyvips.Image) -> list[int]:
 
 class ImgData:
     def __init__(self, image: pyvips.Image):
-        self.pixels = array.array(  # type: ignore[type-var]
+        self.pixels = array.array(
             'B', bytes(image.write_to_memory())
         )
         self.width, self.height = image.width, image.height

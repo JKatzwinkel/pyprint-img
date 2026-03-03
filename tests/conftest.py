@@ -1,4 +1,4 @@
-import pyvips
+import pyvips  # type: ignore[import-untyped]
 
 import pytest
 

@@ -2,7 +2,7 @@ import pathlib
 import sys
 from typing import Callable, Iterable, TextIO
 
-import pyvips
+import pyvips  # type: ignore[import-untyped]
 
 from unittest import mock
 import tempfile
