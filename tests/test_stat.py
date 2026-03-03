@@ -1,6 +1,5 @@
-from PIL import Image
-
 import pytest
+from PIL import Image
 
 from bryle.args import parse_args
 from bryle.img import plot_brightness_and_threshold

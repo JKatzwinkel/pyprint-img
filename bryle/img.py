@@ -1,14 +1,14 @@
 import argparse
 import array
+import sys
 from collections import defaultdict
 from typing import Callable, Iterable
-import sys
 
 from PIL import Image, ImageChops, ImageFilter
 
 from .chars import PairCharset
-from .util import Debug
 from .stat import BoxplotCharset, boxplot, percentile, plot
+from .util import Debug
 
 
 class ImgData:

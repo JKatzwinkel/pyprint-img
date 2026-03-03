@@ -1,11 +1,10 @@
 import argparse
-from enum import StrEnum
 import pathlib
 import textwrap
+from enum import StrEnum
 from typing import Callable
 
 from .img import THRESHOLD_FUNC_FACTORIES
-
 
 DitherMethod = StrEnum('DitherMethod', ['atkinson', 'floyd-steinberg'])
 

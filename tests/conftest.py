@@ -1,6 +1,5 @@
-from PIL import Image
-
 import pytest
+from PIL import Image
 
 
 @pytest.fixture(scope='session')

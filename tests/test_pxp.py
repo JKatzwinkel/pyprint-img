@@ -1,6 +1,5 @@
-from PIL import Image
-
 import pytest
+from PIL import Image
 
 from bryle.img import ImgData
 from bryle.pxp import sample_func

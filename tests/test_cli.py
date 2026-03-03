@@ -1,16 +1,15 @@
 import pathlib
 import sys
+import tempfile
 from typing import Callable, Iterable, TextIO
+from unittest import mock
 
+import pytest
 from PIL import Image
 
-from unittest import mock
-import tempfile
-import pytest
-
 from bryle import (
-    main,
     get_zoom_factor,
+    main,
     plot_image_histogram,
     rasterize,
     terminal_rcwh,

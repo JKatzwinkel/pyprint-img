@@ -11,6 +11,7 @@ dev = [
   'flake8-simplify==0.30.*',
   'isort==7.0.*',
   'mypy==1.19.*',
+  'pre-commit==4.5.*',
   'pytest-cov==7.0.*',
 ]
 

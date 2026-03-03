@@ -1,6 +1,5 @@
 from typing import Iterable, Literal
 
-
 BRAILLE_DOT_MASK = [
     0x01, 0x08,
     0x02, 0x10,
