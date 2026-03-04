@@ -35,8 +35,8 @@ options:
   -t, --threshold-arg NUM
                         value to be passed to the threshold function (see the
                         --threshold option). required if selected threshold
-                        mode is "percentile" or "const". threshold mode
-                        "local" allows values between 0 and 9999.
+                        mode is 'percentile' or 'const'. threshold mode
+                        'local' allows values between 0 and 9999.
 
 debug options:
   -H, --histogram       plot image histogram to stdout.
