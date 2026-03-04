@@ -264,11 +264,11 @@ def test_dither_method(
 
 
 def test_zoom(image: Image.Image) -> None:
-    for line in rasterize(image):
+    for _line in rasterize(image):
         break
-    for line2x in rasterize(image, zoom=2.):
+    for _line2x in rasterize(image, zoom=2.):
         break
-    assert len(line) == len(line2x) // 2
+    assert len(_line) == len(_line2x) // 2
 
 
 def test_fit_to_window(image: Image.Image) -> None:

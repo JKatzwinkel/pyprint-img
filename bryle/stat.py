@@ -16,10 +16,10 @@ def percentile(histogram: list[int], percent: int = 50) -> int:
     '''
     target = sum(histogram) * percent / 100
     acc = 0
-    for i, count in enumerate(histogram):
+    for _i, count in enumerate(histogram):
         if (acc := acc + count) >= target:
             break
-    return i
+    return _i
 
 
 def extrema(histogram: list[int]) -> tuple[int, int]:

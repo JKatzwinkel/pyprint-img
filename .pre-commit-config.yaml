@@ -15,6 +15,14 @@ repos:
         name: isort (python)
         args: [--profile, black]
 
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - additional_dependencies:
+          - flake8-simplify
+          - flake8-bugbear
+        id: flake8
+
 exclude: |
   (?x)^(
     readme\.md
