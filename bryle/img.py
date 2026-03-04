@@ -1,7 +1,7 @@
 import argparse
 import array
 import sys
-from collections import defaultdict
+from collections import Counter
 from typing import Callable, Iterable
 
 from PIL import Image, ImageChops, ImageFilter
@@ -118,7 +118,7 @@ def find_thresholds(
 ) -> list[int]:
     func = get_threshold_func(image, options)
     adjust_brightness = 100 / options.brightness
-    frequencies: dict[int, int] = defaultdict(int)
+    frequencies: dict[int, int] = Counter()
     for py in range(0, image.height, 16):
         for px in range(0, image.width, 16):
             threshold = func((px, py)) * adjust_brightness

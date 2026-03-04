@@ -19,8 +19,9 @@ repos:
     rev: 7.3.0
     hooks:
       - additional_dependencies:
-          - flake8-simplify
           - flake8-bugbear
+          - flake8-pyproject
+          - flake8-simplify
         id: flake8
 
 exclude: |

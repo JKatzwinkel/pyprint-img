@@ -29,8 +29,10 @@ fail_under = 90
 precision = 2
 
 [tool.flake8]
-max_complexity = 8
+max-complexity = 9
 doctests = 1
+extend-ignore = ['E501']
+extend-select = ['B9']
 
 [tool.isort]
 profile = 'black'

@@ -57,7 +57,7 @@ def test_file_not_found() -> None:
 
 @pytest.mark.parametrize(
     'argv, phrase, expect', (
-        ('-m percentile', 'mode "percentile"', True),
+        ('-m percentile', "mode 'percentile'", True),
         ('-m percentile', '0 and 99', True),
         ('-m percentile', 'default: 50', True),
         ('-m local', 'allows values', True),
@@ -260,7 +260,7 @@ def test_dither_method(
         pattern in output for pattern in patterns
     ) is expected
     predicate = 'expected' if expected else 'not expected'
-    assert assertion, f'any of "{patterns}" {predicate} in {output}'
+    assert assertion, f'any of "{patterns!r}" {predicate} in {output}'
 
 
 def test_zoom(image: Image.Image) -> None:

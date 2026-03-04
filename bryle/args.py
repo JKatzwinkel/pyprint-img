@@ -162,14 +162,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         'value to be passed to the threshold function '
         f'(see the --{thr_mode_arg_name} option). '
         'required if selected threshold mode is '
-        f'{" or ".join(f'"{mode}"' for mode in thr_modes_requiring_args)}. '
+        f'{" or ".join(f'{mode!r}' for mode in thr_modes_requiring_args)}. '
     )
     _, thr_arg_value_range, thr_arg_value_default = THRESHOLD_FUNC_FACTORIES[
         thr_options.threshold_mode
     ]
     if thr_arg_value_range:
         thr_arg_help += (
-            f'threshold mode "{thr_options.threshold_mode}" '
+            f'threshold mode {thr_options.threshold_mode!r} '
             'allows values between '
             f'{" and ".join(map(str, thr_arg_value_range))}'
         )
