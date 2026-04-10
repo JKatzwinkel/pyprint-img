@@ -21,7 +21,7 @@ jobs:
           python-version: '3.13'
           cache: pip
 
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
 
       - run: pip install .[dev]
 
@@ -49,7 +49,7 @@ jobs:
           python-version: '3.13'
           cache: pip
 
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
 
       - run: pip install .
 
