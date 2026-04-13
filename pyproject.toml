@@ -2,7 +2,7 @@
 name = 'brylify'
 version = "0.0.0"
 dependencies = [
-  'pillow>=12.1.0',
+  'pillow>=12.2.0',
 ]
 
 [project.optional-dependencies]
