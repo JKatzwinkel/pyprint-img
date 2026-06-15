@@ -154,10 +154,10 @@ def pair2blocks(left: float, right: float) -> str:
     >>> pair2blocks(-.5, .75)
     ' '
     '''
-    if (codepoint := EIGHTH_PAIRS.get((
+    if codepoint := EIGHTH_PAIRS.get((
         min(4, max(0, int(left * 4))),
         min(4, max(0, int(right * 4))),
-    ))):
+    )):
         return chr(codepoint)
     if left < 0 or right < 0:
         return ' '

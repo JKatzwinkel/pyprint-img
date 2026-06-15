@@ -140,7 +140,7 @@ def plot(
     ]
     line = []
     for j in range(r):
-        y = (r - j)
+        y = r - j
         for i in range(0, len(histogram) - 1, 2):
             left, right = (
                 bin_height[i + dx] - y + 1 for dx in range(2)

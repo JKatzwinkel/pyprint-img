@@ -66,7 +66,7 @@ def terminal_rcwh(
     stdin: TextIO = sys.stdin, stdout: TextIO = sys.stdout,
     fallback_values: tuple[int, int, int, int] = (53, 53,  477, 1007),
 ) -> tuple[int, int, int, int]:
-    if (TERM_RCWH := os.environ.get('TERM_RCWH')):
+    if TERM_RCWH := os.environ.get('TERM_RCWH'):
         values = TERM_RCWH.split('x')
         Debug.log(
             f'got fixed term size from TERM_RCWH env var: {"×".join(values)}'

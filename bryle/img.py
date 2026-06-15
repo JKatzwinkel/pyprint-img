@@ -39,7 +39,7 @@ def thr_const_factory(
 
 def thr_btw_extr_factory(image: Image.Image, _: int | None) -> ThresholdFunc:
     threshold = sum(
-        (extrema := image.convert('L').getextrema())  # type: ignore[arg-type]
+        extrema := image.convert('L').getextrema()  # type: ignore[arg-type]
     ) / 2
     Debug.log(f'min/max brightness {extrema} -> threshold={threshold}')
     return lambda pixel: threshold

@@ -8,6 +8,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   'flake8-bugbear==25.11.*',
+  'flake8-picky-parentheses==0.6.*',
   'flake8-pyproject==1.2.*',
   'flake8-simplify==0.30.*',
   'isort==8.0.*',
