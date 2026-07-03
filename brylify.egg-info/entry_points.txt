@@ -1,0 +1,3 @@
+[console_scripts]
+bra = bryle:main
+p = bryle:main
