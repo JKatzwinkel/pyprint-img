@@ -8,7 +8,7 @@ converts image files into monochrome unicode text utilizing the braille charset.
 ## usage
 
 ```help
-usage: bra [-h] [-m MODE] [-o FILE] [-f] [-H] [-d] [-y] [-z FACTOR | -x] [-v]
+usage: bra [-h] [-m MODE] [-o FILE] [-f] [-H] [-d] [-y] [-z FACTOR | -Z] [-i]
            [-a] [-A] [-b LEVEL] [-e [FACTOR]] [-D METH | --floyd] [-t NUM]
            FILE
 
@@ -19,20 +19,22 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -m, --threshold MODE  threshold mode, allowed values:
+  -m MODE, --threshold MODE
+                        threshold mode, allowed values:
                         [extrema|median|percentile|const|local] (default:
                         local)
-  -o, --output FILE     output file (default: /dev/stdout).
+  -o FILE, --output FILE
+                        output file (default: /dev/stdout).
   -f, --force           overwrite existing output file (default: True for
                         /dev/stdout).
   -y, --crop-y          crop image to terminal height.
-  -v, --invert          invert 'pixel' values of output.
+  -i, --invert          invert 'pixel' values of output.
   -a, --sharpen         enhance input image by emphasizing edges a little (the
                         more often the option gets repeated, the more).
   -A, --aliasing        disable antialiasing.
-  -b, --brightness LEVEL
+  -b LEVEL, --brightness LEVEL
                         adjust brightness in percent (default: 100).
-  -t, --threshold-arg NUM
+  -t NUM, --threshold-arg NUM
                         value to be passed to the threshold function (see the
                         --threshold option). required if selected threshold
                         mode is 'percentile' or 'const'. threshold mode
@@ -44,16 +46,18 @@ debug options:
                         /dev/stderr.
 
 resizing options:
-  -z, --zoom FACTOR     factor by which input image should be scaled in size.
-  -x, --fit-x           scale image so it fits into the terminal window
+  -z FACTOR, --zoom FACTOR
+                        factor by which input image should be scaled in size.
+  -Z, --auto-zoom       scale image so it fits into the terminal window
                         horizontally.
 
 dithering options:
-  -e, --dither [FACTOR]
+  -e [FACTOR], --dither [FACTOR]
                         error preservation factor/dithering ratio. accepts an
                         optional float value and assumes 1.0 if omitted.
                         (default: 0.0).
-  -D, --dmethod METH    dither method to use (one of atkinson|floyd-steinberg,
+  -D METH, --dmethod METH
+                        dither method to use (one of atkinson|floyd-steinberg,
                         default: atkinson).
   --floyd               shortcut for -Dfloyd-steinberg
 
@@ -123,7 +127,7 @@ this is useful for integrating with other command-line tools:
 ```bash
 # enable 10% dithering && invert output
 curl -s https://www.python.org/static/community_logos/python-logo-master-v3-TM.png \
-  | bra - -ve.1
+  | bra - -ie.1
 ```
 
 ```output
@@ -144,7 +148,7 @@ curl -s https://www.python.org/static/community_logos/python-logo-master-v3-TM.p
 enable dithering but invert color values:
 
 ```bash
-bra eppels.png -e.5 -v
+bra eppels.png -e.5 -i
 ```
 
 ```output
@@ -224,7 +228,7 @@ bra eppels.png -t 5 -aaa
 enable debug messages to `/dev/stderr` with the `-d`/`--debug` flag.
 
 ```bash
-TERM_RCWH=5x20 bra eppels.png -dxy 2>&1
+TERM_RCWH=5x20 bra eppels.png -dZy 2>&1
 ```
 
 ```output
@@ -254,7 +258,7 @@ cannot be determined and passing of a fixed terminal size might be necessary:
 # set fixed terminal size in rows×cols
 export TERM_RCWH=14x79
 # run braillify with no tty at neither stdin nor stdout
-cat shelly.jpg | bra - -dxye.3 2>&1 > >(cat)
+cat shelly.jpg | bra - -dZye.3 2>&1 > >(cat)
 ```
 
 ```output

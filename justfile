@@ -87,7 +87,7 @@ profile imgfile='eppels.png':
   import pstats
   import bryle
   with cProfile.Profile() as pr:
-      bryle.main('{{imgfile}} -dxe.5'.split())
+      bryle.main('{{imgfile}} -dZe.5'.split())
       stats = pstats.Stats(pr)
       stats.sort_stats('cumulative')
       stats.print_stats(16)

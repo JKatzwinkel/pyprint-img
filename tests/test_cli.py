@@ -28,8 +28,8 @@ from bryle.args import DitherMethod, parse_args
         ('-m percentile -t 128 f.pn', True),
         ('-m local f.png', False),
         ('-m local -t fya f.png', True),
-        ('--fit f.png', False),
-        ('-z 2 -x f.png', True),
+        ('--auto f.png', False),
+        ('-z 2 -Z f.png', True),
         ('-z -1.2 f.png', True),
         ('-z fya f.png', True),
         ('-z 1.2 f.png', False),
@@ -158,7 +158,7 @@ def test_overwrite_terminal_size_via_env_var(
 ) -> None:
     os_environ_get_mock.side_effect = lambda k: rcwh_var
     main(
-        f'eppels.png -o {tmpfile} -xydA'.split(),
+        f'eppels.png -o {tmpfile} -ZydA'.split(),
         load_image_file_func=load_cached_image,
     )
     output = tmpfile.read_text().split('\n')
@@ -178,7 +178,7 @@ def test_fit_to_width(
 ) -> None:
     os_environ_get_mock.side_effect = lambda k: f'20x{columns}'
     main(
-        f'eppels.png -o {tmpfile} -xydA'.split(),
+        f'eppels.png -o {tmpfile} -ZydA'.split(),
         load_image_file_func=load_cached_image,
     )
     output = tmpfile.read_text().split('\n')
@@ -215,7 +215,7 @@ def test_stdin_input_fit_width(
     get_ioctl_windowsize_mock.side_effect = _get_ioctl_windowsize
     with pathlib.Path('eppels.png').open() as stdin:
         sys.stdin = stdin
-        main(f'- -d -o {tmpfile} -xy'.split())
+        main(f'- -d -o {tmpfile} -Zy'.split())
     assert len(tmpfile.read_text().split('\n')[0]) == 40
 
 

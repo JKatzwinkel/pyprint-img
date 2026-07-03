@@ -109,13 +109,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help='factor by which input image should be scaled in size.',
     )
     argp_scale_group.add_argument(
-        '-x', '--fit-x', dest='zoom_factor', action='store_const', const=0,
+        '-Z', '--auto-zoom', dest='zoom_factor', action='store_const', const=0,
         help=(
             'scale image so it fits into the terminal window horizontally.'
         ),
     )
     argp.add_argument(
-        '-v', '--invert', dest='invert', action='store_true',
+        '-i', '--invert', dest='invert', action='store_true',
         help="invert 'pixel' values of output.",
     )
     argp.add_argument(
