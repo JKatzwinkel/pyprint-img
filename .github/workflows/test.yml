@@ -60,7 +60,7 @@ jobs:
         run: just doc
 
       - name: install imagemagick
-        uses: mfinelli/setup-imagemagick@v7.0.1
+        uses: mfinelli/setup-imagemagick@v8.0.0
 
       - name: ':memo: update screenshot'
         run: just take-screenshot
